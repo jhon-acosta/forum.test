@@ -14,6 +14,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.forum.api.dto.error.ApiErrorResponse;
 import com.forum.api.dto.error.FieldValidationError;
@@ -44,6 +45,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleUnreadableBody(HttpMessageNotReadableException exception,
             HttpServletRequest request) {
         return build(HttpStatus.BAD_REQUEST, "Malformed request body", request, List.of());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException exception,
+            HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, "Invalid parameter: " + exception.getName(), request, List.of());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
