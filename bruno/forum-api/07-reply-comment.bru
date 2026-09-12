@@ -1,0 +1,26 @@
+meta {
+  name: 07 Reply to Comment
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{host}}/api/discussions/{{discussionId}}/comments
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "content": "A reply",
+    "parentId": "00000000-0000-0000-0000-000000000000"
+  }
+}
+
+vars:pre-request {
+  discussionId: 00000000-0000-0000-0000-000000000000
+}

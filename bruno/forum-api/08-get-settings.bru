@@ -1,0 +1,14 @@
+meta {
+  name: 08 Get Settings
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{host}}/api/users/me/settings
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

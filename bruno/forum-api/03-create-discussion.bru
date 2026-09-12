@@ -1,0 +1,22 @@
+meta {
+  name: 03 Create Discussion
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{host}}/api/discussions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "title": "Hello World",
+    "content": "My first discussion"
+  }
+}

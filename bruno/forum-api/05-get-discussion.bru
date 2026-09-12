@@ -1,0 +1,18 @@
+meta {
+  name: 05 Get Discussion with Comments
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{host}}/api/discussions/{{discussionId}}
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+vars:pre-request {
+  discussionId: 00000000-0000-0000-0000-000000000000
+}

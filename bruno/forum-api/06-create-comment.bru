@@ -1,0 +1,25 @@
+meta {
+  name: 06 Create Comment
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{host}}/api/discussions/{{discussionId}}/comments
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "content": "First comment"
+  }
+}
+
+vars:pre-request {
+  discussionId: 00000000-0000-0000-0000-000000000000
+}

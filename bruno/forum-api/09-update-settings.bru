@@ -1,0 +1,21 @@
+meta {
+  name: 09 Update Settings to Unlimited
+  type: http
+  seq: 9
+}
+
+patch {
+  url: {{host}}/api/users/me/settings
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "maxReplyDepth": null
+  }
+}

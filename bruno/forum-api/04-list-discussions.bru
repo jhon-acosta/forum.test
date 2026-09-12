@@ -1,0 +1,14 @@
+meta {
+  name: 04 List Discussions
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{host}}/api/discussions
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

@@ -1,0 +1,14 @@
+meta {
+  name: 10 Logout
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{host}}/api/auth/logout
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
