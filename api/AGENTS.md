@@ -4,14 +4,15 @@ Guía para agentes de IA y desarrolladores que trabajen en el backend del foro.
 
 ## Stack
 
-- Java 21 (Temurin), Spring Boot 4.1.1, Maven (Maven Wrapper `./mvnw`).
-- Persistencia en archivos JSON (sin base de datos, sin microservicios, sin Docker).
-- JSON con **Jackson 3** (`tools.jackson.core`). Ojo: `com.fasterxml.jackson` (Jackson 2) no aplica.
-  Por eso `org.openapitools:jackson-databind-nullable` **no** es compatible.
+- **Java 21** (Temurin en `~/.local/opt/jdk-21`) + **Maven Wrapper** (`./mvnw`, no requiere `mvn` global).
+- **Spring Boot 4.1.1**, **Spring Security 7.1.1**, **Spring MVC 7**, **Validation (Jakarta)**, **Lombok**, **DevTools**.
+- **Jackson 3** (`tools.jackson.core:jackson-databind:3.1.5`) — Ojo: `com.fasterxml.jackson` (Jackson 2) no aplica; por eso `org.openapitools:jackson-databind-nullable` **no** es compatible. `WRITE_DATES_AS_TIMESTAMPS` es `tools.jackson.databind.cfg.DateTimeFeature`.
+- Persistencia en archivos JSON (`data/users.json`, `discussions.json`, `comments.json`, `tokens.json`) — sin base de datos, microservicios ni Docker.
+- Puerto por defecto **8081** (`server.port: 8081` en `src/main/resources/application.yml`; 8080 ocupado por nginx en esta máquina).
 
 ## Entorno en esta máquina
 
-`~/.m2` pertenece a `root`, así que se usa un Maven home de usuario. Antes de compilar:
+`~/.m2` pertenece a `root`, así que se usa Maven home local. Antes de compilar:
 
 ```bash
 export JAVA_HOME="$HOME/.local/opt/jdk-21"
@@ -20,15 +21,18 @@ export MAVEN_USER_HOME="$HOME/.local/share/maven"
 export MAVEN_OPTS="-Dmaven.repo.local=$HOME/.local/share/maven/repository"
 ```
 
-En VS Code basta con que el `settings.json` apunte a `java.jdt.ls.java.home` = `~/.local/opt/jdk-21`.
+En VS Code: `settings.json` con `"java.jdt.ls.java.home": "$HOME/.local/opt/jdk-21"`. Extensiones instaladas: `vscjava.vscode-java-pack` + `vmware.vscode-boot-dev-pack`.
 
 ## Comandos
 
 ```bash
-./mvnw test          # ejecuta las pruebas
-./mvnw spring-boot:run   # arranca la API (http://localhost:8080)
-./mvnw clean package # construye el jar
+./mvnw test                          # 42 tests (ver sección Pruebas)
+./mvnw spring-boot:run               # http://localhost:8081 (data en ./data)
+SERVER_PORT=8081 ./mvnw spring-boot:run  # override temporal
+./mvnw clean package -DskipTests     # jar en target/forum-api-0.0.1-SNAPSHOT.jar
 ```
+
+Colección HTTP: `bruno/forum-api/` (10 requests, env `local` con `host=http://localhost:8081`). Script `marvel-test.sh` registra `tony/natasha/bruce` y ejercita niveles.
 
 ## Arquitectura (modular monolith)
 
@@ -36,25 +40,59 @@ En VS Code basta con que el `settings.json` apunte a `java.jdt.ls.java.home` = `
 controller -> service -> repository -> JSON files
 ```
 
-- `config/` configuración (ObjectMapper, CORS, seguridad, propiedades).
-- `model/` entidades de dominio.
-- `dto/` contratos de entrada/salida HTTP (los modelos no se exponen directo).
-- `repository/` acceso a `data/*.json`.
-- `service/` lógica de negocio (incluye validación de profundidad y armado del árbol).
-- `controller/` endpoints REST.
-- `exception/` errores y `@RestControllerAdvice`.
+```
+config/  ForumProperties, JacksonConfig (JsonMapperBuilderCustomizer), CorsConfig, SecurityConfig, TokenAuthenticationFilter, RestAuthenticationEntryPoint, RestAccessDeniedHandler
+model/   User(id,username,passwordHash,maxReplyDepth,createdAt), Discussion(id,title,content,authorId,createdAt), Comment(id,discussionId,parentId,authorId,content,createdAt), AuthToken(token,userId,createdAt)
+dto/     auth/RegisterRequest,LoginRequest,AuthResponse | user/UserResponse,AuthorResponse,SettingsResponse,UpdateUserSettingsRequest(Optional<Integer>) | discussion/CreateDiscussionRequest,DiscussionSummary,DiscussionResponse | comment/CreateCommentRequest,CommentResponse | error/ApiErrorResponse,FieldValidationError
+repository/ JsonFileRepository<T,ID> + UserRepository, DiscussionRepository, CommentRepository, TokenRepository
+service/  AuthService, TokenService, UserService, DiscussionService, CommentService
+controller/ AuthController, UserController, DiscussionController, CommentController
+exception/ ApiException, GlobalExceptionHandler (@RestControllerAdvice)
+```
 
-## Reglas de negocio clave
+- `ForumProperties` (`forum.data-dir`, `default-max-reply-depth=3`, `cors-allowed-origins=[http://localhost:4200]`).
+- `JacksonConfig` desactiva `DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS`, activa `INDENT_OUTPUT`, desactiva `FAIL_ON_UNKNOWN_PROPERTIES`.
+- `CorsConfig` expone `CorsConfigurationSource` para `/api/**` con `AllowCredentials`.
 
-- `id` = UUID generado por la app. Nunca `_id` ni ObjectId.
-- Comentarios planos en `comments.json` con `parentId`; el árbol se arma en el service.
-- `maxReplyDepth` pertenece al dueño de la discusión: discusión = nivel 0, comentario directo = nivel 1.
-  Default `3`; `null` = ilimitado.
-- Passwords con BCrypt; nunca exponer `passwordHash`.
+## Modelo y validaciones (preciso)
+
+- **User:** `username` `@NotBlank @Size(3..30)` único `trim()`, `password` `@NotBlank @Size(6..100)` → BCrypt, `maxReplyDepth` Integer `>=0` o `null` (default 3).
+- **Discussion:** `title` `@NotBlank @Size(max 150)`, `content` `@NotBlank @Size(max 10000)`.
+- **Comment:** `content` `@NotBlank @Size(max 5000)`, `parentId` nullable UUID que debe existir y pertenecer a la misma `discussionId`.
+
+## Endpoints expuestos (12)
+
+| Método | Ruta | Auth | Request | Response | Códigos |
+|--------|------|------|---------|----------|---------|
+| POST | `/api/auth/register` | no | `{username,password}` | `201 UserResponse` | 400, 409 |
+| POST | `/api/auth/login` | no | `{username,password}` | `200 {token,user}` | 401 |
+| POST | `/api/auth/logout` | sí | `Authorization: Bearer` | `204` | 401 |
+| GET | `/api/users/me` | sí | — | `200 UserResponse` | 401 |
+| GET | `/api/users/me/settings` | sí | — | `200 {maxReplyDepth}` | 401 |
+| PATCH | `/api/users/me/settings` | sí | `{maxReplyDepth:number\|null}` (absent=no cambia) | `200 {maxReplyDepth}` | 400, 401 |
+| GET | `/api/discussions` | sí | — | `200 [DiscussionSummary]` | 401 |
+| POST | `/api/discussions` | sí | `{title,content}` | `201 DiscussionResponse` | 400, 401 |
+| GET | `/api/discussions/{id}` | sí | — | `200 DiscussionResponse{comments:[CommentResponse]}` | 400, 401, 404 |
+| GET | `/api/users/me/discussions` | sí | — | `200 [DiscussionSummary]` | 401 |
+| POST | `/api/discussions/{id}/comments` | sí | `{content,parentId?}` | `201 CommentResponse` | 400, 401, 404, 422 |
+| GET | `/api/discussions/{id}/comments` | sí | — | `200 [CommentResponse]` árbol | 401, 404 |
+
+Árbol: `CommentService.buildTree` agrupa por `parentId`, ordena por `createdAt`, recursa. Nivel `discusión=0, direct=1`. Errores en `{timestamp,status,error,message,path,details[]}` vía `GlobalExceptionHandler` (cubre `MethodArgumentTypeMismatch`, `HttpMessageNotReadable`, `AccessDenied`).
+
+## Persistencia y seguridad (preciso)
+
+- `JsonFileRepository<T,ID>` abstracto con `Function<T,ID>`, `JavaType`, `ReentrantReadWriteLock` y escritura a temp + `Files.move(ATOMIC_MOVE, REPLACE_EXISTING)` con fallback. Directorios creados en constructor.
+- `UserRepository.findByUsername/existsByUsername`, `DiscussionRepository.findByAuthorId`, `CommentRepository.findByDiscussionId`, `TokenRepository(String)`.
+- `BCryptPasswordEncoder`, token opaco `UUID.randomUUID().toString()` en `tokens.json`, `TokenAuthenticationFilter extends OncePerRequestFilter` → `UsernamePasswordAuthenticationToken(User, null, [])` en `SecurityContext` (`@AuthenticationPrincipal User`), `SecurityFilterChain` stateless, CSRF off, CORS on, `RestAuthenticationEntryPoint` 401 y `RestAccessDeniedHandler` 403 escriben `ApiErrorResponse` vía `JsonMapper.writeValueAsString`.
+
+## Pruebas (42)
+
+- `ForumApiApplicationTests` 1, `JsonFileRepositoryTest` 9 (concurrencia 8×10), `UpdateUserSettingsRequestTest` 3, `AuthServiceTest` 7, `UserServiceTest` 6, `DiscussionServiceTest` 5, `CommentServiceTest` 8 (niveles), `ForumApiIntegrationTest` 3 (`@SpringBootTest` + `MockMvc` en `:8081`, `target/test-data`, flujo E2E con `422→PATCH null→nivel 4/5`).
 
 ## Convenciones
 
-- Commits en **Conventional Commits** (`feat`, `fix`, `test`, `docs`, `chore`, `refactor`).
+- **Conventional Commits** (`feat`, `fix`, `test`, `docs`, `chore`, `refactor`) con scopes `config|domain|persistence|api|auth|user|discussion|comment`.
 - No agregar comentarios al código salvo que se soliciten.
-- Cada feature debe incluir sus pruebas unitarias (`*Test`).
+- Cada feature incluye sus `*Test`.
 - Commits y push requieren aprobación explícita del usuario.
+- Puerto documentado: **8081** (`application.yml` + `bruno/**/local.bru`).
