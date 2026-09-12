@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: forum-api
+
+server:
+  port: 8080
+
+forum:
+  data-dir: ./data
+  default-max-reply-depth: 3
+  cors-allowed-origins:
+    - http://localhost:4200
