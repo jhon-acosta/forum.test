@@ -25,12 +25,14 @@ public class DiscussionService {
     private final DiscussionRepository discussionRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
+    private final CommentService commentService;
 
     public DiscussionService(DiscussionRepository discussionRepository, UserRepository userRepository,
-            CommentRepository commentRepository) {
+            CommentRepository commentRepository, CommentService commentService) {
         this.discussionRepository = discussionRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
+        this.commentService = commentService;
     }
 
     public DiscussionResponse create(CreateDiscussionRequest request, UUID authorId) {
@@ -56,7 +58,8 @@ public class DiscussionService {
         Discussion discussion = discussionRepository.findById(id)
                 .orElseThrow(() -> ApiException.notFound("Discussion not found"));
         User author = findUser(discussion.authorId());
-        return toResponse(discussion, author);
+        List<CommentResponse> comments = commentService.findTree(discussion.id());
+        return toResponse(discussion, author, comments);
     }
 
     public List<DiscussionSummary> findByAuthorId(UUID authorId) {
@@ -79,13 +82,17 @@ public class DiscussionService {
     }
 
     private DiscussionResponse toResponse(Discussion discussion, User author) {
+        return toResponse(discussion, author, List.of());
+    }
+
+    private DiscussionResponse toResponse(Discussion discussion, User author, List<CommentResponse> comments) {
         return new DiscussionResponse(
                 discussion.id(),
                 discussion.title(),
                 discussion.content(),
                 AuthorResponse.from(author),
                 discussion.createdAt(),
-                List.of());
+                comments);
     }
 
     private User findUser(UUID userId) {

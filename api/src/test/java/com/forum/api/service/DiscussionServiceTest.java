@@ -39,8 +39,11 @@ class DiscussionServiceTest {
     @Mock
     private CommentRepository commentRepository;
 
+    @Mock
+    private CommentService commentService;
+
     private DiscussionService discussionService() {
-        return new DiscussionService(discussionRepository, userRepository, commentRepository);
+        return new DiscussionService(discussionRepository, userRepository, commentRepository, commentService);
     }
 
     private User user(UUID id, String username) {
@@ -102,6 +105,7 @@ class DiscussionServiceTest {
 
         when(discussionRepository.findById(discussion.id())).thenReturn(Optional.of(discussion));
         when(userRepository.findById(authorId)).thenReturn(Optional.of(author));
+        when(commentService.findTree(discussion.id())).thenReturn(List.of());
 
         DiscussionResponse response = discussionService().findById(discussion.id());
 
