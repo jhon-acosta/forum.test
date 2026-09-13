@@ -2,7 +2,7 @@
 
 Prueba técnica Full Stack con IA asistida. Monorepo `api/` (Spring Boot) + `app/` (Angular) con persistencia en archivos JSON y nivel de anidación configurable por el dueño de la discusión.
 
-> **Estado actual:** Fase 1 (API) **completada y probada** (`./mvnw test` 42/42) en **http://localhost:8081**. Fase 2 (Angular) pendiente.
+> **Estado actual:** Fase 1 (API) **completada y probada** (`./mvnw test` 42/42) en **http://localhost:8081**. Fase 2 (Angular 22 + Tailwind) **en curso** (scaffold, design tokens, auth, discusiones, comentarios y settings implementados; ver `app/`).
 
 ---
 
@@ -22,6 +22,7 @@ Prueba técnica Full Stack con IA asistida. Monorepo `api/` (Spring Boot) + `app
 - [Mejoras identificadas](#mejoras-identificadas)
 - [Cambio funcional — niveles configurables](#cambio-funcional--niveles-configurables)
 - [Retos encontrados](#retos-encontrados)
+- [Fase 2 — App Angular](#fase-2--app-angular-en-curso)
 
 ---
 
@@ -494,4 +495,14 @@ POST ... {content:"E", parentId:D}   → 5 OK (ilimitado)
 
 **Puerto 8080 ocupado por nginx (desde 2026-09-12 el default es 8081):** El error `Web server failed to start. Port 8080 was already in use` provenía de nginx, no del foro. Se fijó `server.port: 8081` y `bruno/.../local.bru` a `8081`; las pruebas E2E y `marvel-test.sh` usan `8081`.
 
-Verificación final: `./mvnw test` **42/42** y colección Bruno lista.
+---
+
+## Fase 2 — App Angular (en curso)
+
+**Stack:** Angular **22.1.6** (standalone, zoneless, OnPush), **Tailwind CSS 4.1.12** CSS-first (`@import 'tailwindcss'` + `@theme` en `src/styles.css`), **TypeScript 6.0**, **Vitest 4.1.11**, **pnpm 12.4.1**.
+
+**Estado:** Scaffold con `--style=tailwind --routing --ssr=false --zoneless --test-runner=vitest`, design tokens (`--color-canvas/surface/ink/muted/line/accent`, `--radius-card`, `--shadow-card`), `proxy.conf.json` → `8081`, core con `AuthService` (signals + `localStorage`), `tokenInterceptor`, `authGuard`/`guestGuard`, rutas protegidas (`/discussions` etc. redirigen a `/auth/login?returnUrl=`), y auth UI con **Signal Forms** (`form`, `FormField`, `required`, `minLength`, `submit`).
+
+**Próximo:** discusiones, comentarios anidados y settings (ver `docs/plans/phase-2-app-plan.md`).
+
+Verificación final (parcial): `./mvnw test` **42/42** (API) y `pnpm run build` + `npx ng test --watch=false` (App) en verde.

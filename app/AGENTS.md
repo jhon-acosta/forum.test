@@ -2,32 +2,37 @@
 
 Guía para agentes de IA y desarrolladores que trabajen en el frontend.
 
-## Stack (Fase 2) — backend ya disponible en :8081
+## Stack (Fase 2 — backend en :8081)
 
-- **Angular 18+** (standalone, TypeScript) + **Angular CLI** (`npx ng` o `npm i -g @angular/cli`).
-- Estado de sesión con token opaco en `localStorage` + `HttpInterceptor` que añade `Authorization: Bearer <token>`.
+- **Angular 22.1.6** (standalone, zoneless, OnPush por defecto) + **Angular CLI 22.1.8** + **TypeScript 6.0**.
+- **Tailwind CSS 4.1.12** CSS-first (`@import 'tailwindcss'` + `@theme` en `src/styles.css`, `.postcssrc.json` con `@tailwindcss/postcss`).
+- **Vitest 4.1.11** (runner por defecto) + `jsdom`.
+- **pnpm 12.4.1** (`packageManager` `pnpm@12.4.1`, `pnpm-workspace.yaml` con `allowBuilds`).
+- Estado de sesión con token opaco en `localStorage` (`forum_token`, `forum_user`) + `HttpInterceptor` (`Authorization: Bearer`).
 - **Backend listo:** `http://localhost:8081` (ver `bruno/forum-api` y `marvel-test.sh`). 12 endpoints bajo `/api`; CORS permite `http://localhost:4200` → `8081`.
 
 ## Comandos
 
 ```bash
-npx @angular/cli new app --routing --style=css   # scaffold (pendiente, repo ya tiene app/AGENTS.md)
 cd app
-npm install
-npm start        # ng serve -> http://localhost:4200 (proxy a 8081)
-npm test         # Karma/Jest
-npm run build
+pnpm install                    # instala (usa pnpm, no npm)
+pnpm approve-builds --all       # aprueba esbuild, @parcel/watcher, etc. si es necesario
+pnpm run build                  # ng build -> dist/forum-app
+pnpm exec ng test --watch=false # Vitest (TestBed zoneless)
+pnpm start                      # ng serve -> http://localhost:4200 (proxy a 8081)
 ```
+
+`ng serve` usa `proxy.conf.json` (`/api` → `http://localhost:8081`).
 
 ## Integración con la API (precisa, 8081)
 
-Base `http://localhost:8081`. Header `Authorization: Bearer {{token}}` tras `POST /api/auth/login` (`{{token}}` guardado por `bruno/02-login.bru`).
+Base `http://localhost:8081`. Header `Authorization: Bearer {{token}}` tras `POST /api/auth/login`.
 
 | Método | Ruta | Uso en app |
 |--------|------|------------|
 | POST | `/api/auth/register` | formulario registro |
-| POST | `/api/auth/login` | guarda token |
-| POST | `/api/auth/logout` | limpia token |
+| POST | `/api/auth/login` | guarda token + user |
+| POST | `/api/auth/logout` | limpia sesión |
 | GET | `/api/users/me` | perfil |
 | GET/PATCH | `/api/users/me/settings` | `maxReplyDepth` (number\|null, absent=no cambia) |
 | GET | `/api/discussions` | feed |
@@ -37,26 +42,34 @@ Base `http://localhost:8081`. Header `Authorization: Bearer {{token}}` tras `POS
 | POST | `/api/discussions/{id}/comments` | crear comentario/reply (`content`, `parentId?`) |
 | GET | `/api/discussions/{id}/comments` | árbol alternativo |
 
-Modelos: `User{id,username,maxReplyDepth,createdAt}`, `Discussion{id,title,content,author,createdAt}`, `Comment{id,parentId,content,author,createdAt,replies:[]}`. Errores en `{timestamp,status,error,message,path,details[]}` (ej. `422 Maximum reply depth exceeded`).
+Modelos: `UserResponse{id,username,maxReplyDepth,createdAt}`, `DiscussionSummary/Response`, `CommentResponse{id,parentId,content,author,createdAt,replies:[]}`. Errores en `{timestamp,status,error,message,path,details[]}` (ej. `422 Maximum reply depth exceeded`).
 
-## Estructura prevista
+## Estructura (naming 2025 — conciso)
 
 ```
 app/src/app/
-├── core/           # auth.service.ts, token.interceptor.ts, auth.guard.ts
+├── app.ts / app.html / app.css / app.config.ts / app.routes.ts
+├── core/
+│   ├── api.ts
+│   ├── auth.ts                 # AuthService (signals)
+│   ├── token.interceptor.ts
+│   ├── auth.guard.ts
+│   └── guest.guard.ts
 ├── features/
-│   ├── auth/       # login.component, register.component
-│   ├── discussions/# list.component, detail.component, create.component
-│   └── comments/   # comment-tree.component (recursivo), composer.component
-└── shared/         # pipes, ui
+│   ├── auth/         login.ts/.html, register.ts/.html
+│   ├── discussions/  discussion-list.ts/.html, discussion-detail.ts/.html, discussion-create.ts/.html, discussions.ts (service)
+│   ├── comments/     comment-tree.ts/.html, comment-composer.ts/.html, comments.ts (service)
+│   └── settings/     settings.ts/.html
+└── shared/
+    └── relative-time.ts
 ```
 
-`comment-tree.component` renderiza `CommentResponse` recursivamente (como `DiscussionResponse.comments` del backend).
+`styles.css` con `@theme` (tokens `--color-canvas/surface/ink/muted/line/accent`, `--radius-card`, `--shadow-card`).
 
 ## Convenciones
 
-- **Conventional Commits** con scopes `core|auth|discussions|comments`.
+- **Conventional Commits** con scopes `app|core|auth|discussions|comments|settings`.
 - No agregar comentarios al código salvo que se soliciten.
-- Cada feature incluye tests.
+- Cada feature incluye tests (Vitest + TestBed zoneless).
 - Commits y push requieren aprobación explícita del usuario.
-- Documentar cambios de contrato (si el backend cambia `maxReplyDepth` o añade `GET /api/discussions?sort=...`).
+- Documentar cambios de contrato.
