@@ -1,0 +1,65 @@
+<div class="min-h-screen flex items-center justify-center bg-canvas px-4 py-12">
+  <div class="w-full max-w-md bg-surface rounded-[var(--radius-card)] shadow-[var(--shadow-card)] border border-line p-8">
+    <div class="mb-8 text-center">
+      <h1 class="text-2xl font-semibold tracking-tight">Hilo</h1>
+      <p class="text-sm text-muted mt-1">Foro con niveles configurables</p>
+    </div>
+
+    <h2 class="text-lg font-semibold mb-6">Iniciar sesión</h2>
+
+    @if (serverError()) {
+      <div class="mb-4 rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
+        {{ serverError() }}
+      </div>
+    }
+
+    <form (submit)="onSubmit($event)" novalidate class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium mb-1" for="username">Usuario</label>
+        <input
+          id="username"
+          type="text"
+          autocomplete="username"
+          [formField]="loginForm.username"
+          class="w-full rounded-md border border-line bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+          placeholder="tony"
+        />
+        @if (loginForm.username().touched() && loginForm.username().invalid()) {
+          <p class="mt-1 text-xs text-danger">{{ loginForm.username().errors()[0].message }}</p>
+        }
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1" for="password">Contraseña</label>
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          [formField]="loginForm.password"
+          class="w-full rounded-md border border-line bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+          placeholder="••••••••"
+        />
+        @if (loginForm.password().touched() && loginForm.password().invalid()) {
+          <p class="mt-1 text-xs text-danger">{{ loginForm.password().errors()[0].message }}</p>
+        }
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="loginForm().invalid() || submitting()"
+        class="w-full rounded-md bg-accent hover:bg-accent-strong text-white py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        @if (submitting()) {
+          Entrando…
+        } @else {
+          Entrar
+        }
+      </button>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-muted">
+      ¿No tienes cuenta?
+      <a routerLink="/auth/register" class="text-accent hover:text-accent-strong font-medium">Regístrate</a>
+    </p>
+  </div>
+</div>

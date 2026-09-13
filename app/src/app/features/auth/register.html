@@ -1,0 +1,65 @@
+<div class="min-h-screen flex items-center justify-center bg-canvas px-4 py-12">
+  <div class="w-full max-w-md bg-surface rounded-[var(--radius-card)] shadow-[var(--shadow-card)] border border-line p-8">
+    <div class="mb-8 text-center">
+      <h1 class="text-2xl font-semibold tracking-tight">Hilo</h1>
+      <p class="text-sm text-muted mt-1">Crea tu cuenta</p>
+    </div>
+
+    <h2 class="text-lg font-semibold mb-6">Registro</h2>
+
+    @if (serverError()) {
+      <div class="mb-4 rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
+        {{ serverError() }}
+      </div>
+    }
+
+    <form (submit)="onSubmit($event)" novalidate class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium mb-1" for="username">Usuario</label>
+        <input
+          id="username"
+          type="text"
+          autocomplete="username"
+          [formField]="registerForm.username"
+          class="w-full rounded-md border border-line bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+          placeholder="el usuario se guarda en users.json"
+        />
+        @if (registerForm.username().touched() && registerForm.username().invalid()) {
+          <p class="mt-1 text-xs text-danger">{{ registerForm.username().errors()[0].message }}</p>
+        }
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1" for="password">Contraseña</label>
+        <input
+          id="password"
+          type="password"
+          autocomplete="new-password"
+          [formField]="registerForm.password"
+          class="w-full rounded-md border border-line bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+          placeholder="mínimo 6 caracteres"
+        />
+        @if (registerForm.password().touched() && registerForm.password().invalid()) {
+          <p class="mt-1 text-xs text-danger">{{ registerForm.password().errors()[0].message }}</p>
+        }
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="registerForm().invalid() || submitting()"
+        class="w-full rounded-md bg-accent hover:bg-accent-strong text-white py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        @if (submitting()) {
+          Creando cuenta…
+        } @else {
+          Crear cuenta
+        }
+      </button>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-muted">
+      ¿Ya tienes cuenta?
+      <a routerLink="/auth/login" class="text-accent hover:text-accent-strong font-medium">Inicia sesión</a>
+    </p>
+  </div>
+</div>
