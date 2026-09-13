@@ -18,14 +18,14 @@
 
       @if (menuOpen()) {
         <div
-          class="absolute right-0 mt-2 w-44 rounded-md border border-line bg-surface shadow-[var(--shadow-card)] py-1"
+          class="absolute right-0 mt-2 w-44 rounded-md border border-line bg-surface text-ink shadow-[var(--shadow-card)] py-1 divide-y divide-line"
           role="menu"
         >
           <a
             routerLink="/settings"
             (click)="closeMenu()"
             role="menuitem"
-            class="block px-3 py-2 text-sm hover:bg-canvas"
+            class="block px-3 py-2 text-sm text-ink hover:bg-canvas"
           >
             Configuración
           </a>
@@ -33,7 +33,7 @@
             type="button"
             (click)="logout()"
             role="menuitem"
-            class="block w-full text-left px-3 py-2 text-sm hover:bg-canvas"
+            class="block w-full text-left px-3 py-2 text-sm text-danger hover:bg-red-50"
           >
             Cerrar sesión
           </button>
