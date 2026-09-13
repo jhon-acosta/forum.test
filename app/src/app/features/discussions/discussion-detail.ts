@@ -1,14 +1,15 @@
 import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { DiscussionResponse } from '../../core/api';
 import { DiscussionsService } from './discussions';
 import { RelativeTimePipe } from '../../shared/relative-time';
 import { CommentTree } from '../comments/comment-tree';
 import { CommentComposer } from '../comments/comment-composer';
+import { AppHeader } from '../../shared/app-header';
 
 @Component({
   selector: 'app-discussion-detail',
-  imports: [RouterLink, RelativeTimePipe, CommentTree, CommentComposer],
+  imports: [RelativeTimePipe, CommentTree, CommentComposer, AppHeader],
   templateUrl: './discussion-detail.html',
 })
 export class DiscussionDetail {

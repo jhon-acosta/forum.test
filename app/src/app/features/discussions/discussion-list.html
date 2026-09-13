@@ -1,19 +1,46 @@
 <div class="min-h-screen bg-canvas">
-  <header class="sticky top-0 z-10 bg-surface border-b border-line">
-    <div class="mx-auto max-w-4xl px-4 py-3 flex items-center justify-between">
-      <a routerLink="/discussions" class="text-lg font-semibold tracking-tight">Hilo</a>
-      <div class="flex items-center gap-3">
-        <span class="text-sm text-muted hidden sm:inline">{{ auth.user()?.username }}</span>
-        <a routerLink="/settings" class="text-sm text-muted hover:text-ink">Ajustes</a>
-        <button (click)="logout()" class="text-sm text-muted hover:text-ink">Salir</button>
-      </div>
-    </div>
-  </header>
+  <app-header></app-header>
 
   <main class="mx-auto max-w-4xl px-4 py-8">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-xl font-semibold">Discusiones</h1>
-      <a routerLink="/discussions/new" class="rounded-md bg-accent hover:bg-accent-strong text-white px-4 py-2 text-sm font-medium">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+      <div class="flex items-center gap-2">
+        <div class="inline-flex rounded-md border border-line bg-surface p-1" role="tablist">
+          <button
+            type="button"
+            (click)="setTab('all')"
+            role="tab"
+            [attr.aria-selected]="activeTab() === 'all'"
+            [class.bg-accent]="activeTab() === 'all'"
+            [class.text-white]="activeTab() === 'all'"
+            class="rounded px-3 py-1 text-sm font-medium"
+          >
+            Todas ({{ all().length }})
+          </button>
+          <button
+            type="button"
+            (click)="setTab('mine')"
+            role="tab"
+            [attr.aria-selected]="activeTab() === 'mine'"
+            [class.bg-accent]="activeTab() === 'mine'"
+            [class.text-white]="activeTab() === 'mine'"
+            class="rounded px-3 py-1 text-sm font-medium"
+          >
+            Mías ({{ mine().length }})
+          </button>
+          <button
+            type="button"
+            (click)="setTab('participating')"
+            role="tab"
+            [attr.aria-selected]="activeTab() === 'participating'"
+            [class.bg-accent]="activeTab() === 'participating'"
+            [class.text-white]="activeTab() === 'participating'"
+            class="rounded px-3 py-1 text-sm font-medium"
+          >
+            Participando ({{ participating().length }})
+          </button>
+        </div>
+      </div>
+      <a routerLink="/discussions/new" class="rounded-md bg-accent hover:bg-accent-strong text-white px-4 py-2 text-sm font-medium self-start sm:self-auto">
         Nueva discusión
       </a>
     </div>
@@ -25,14 +52,20 @@
       </div>
     } @else if (error()) {
       <div class="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{{ error() }}</div>
-    } @else if (discussions().length === 0) {
+    } @else if (visible().length === 0) {
       <div class="bg-surface border border-line rounded-[var(--radius-card)] p-8 text-center">
-        <p class="text-sm text-muted">Aún no hay discusiones. Crea la primera.</p>
+        @if (activeTab() === 'mine') {
+          <p class="text-sm text-muted">Aún no has creado discusiones.</p>
+        } @else if (activeTab() === 'participating') {
+          <p class="text-sm text-muted">Aún no participas en ninguna discusión.</p>
+        } @else {
+          <p class="text-sm text-muted">Aún no hay discusiones. Crea la primera.</p>
+        }
         <a routerLink="/discussions/new" class="inline-block mt-4 text-sm text-accent hover:text-accent-strong font-medium">Crear discusión</a>
       </div>
     } @else {
       <div class="space-y-3">
-        @for (d of discussions(); track d.id) {
+        @for (d of visible(); track d.id) {
           <a [routerLink]="['/discussions', d.id]" class="block bg-surface border border-line rounded-[var(--radius-card)] p-4 hover:shadow-[var(--shadow-card)] transition-shadow">
             <h2 class="font-medium line-clamp-1">{{ d.title }}</h2>
             <p class="text-sm text-muted line-clamp-2 mt-1">{{ d.content }}</p>

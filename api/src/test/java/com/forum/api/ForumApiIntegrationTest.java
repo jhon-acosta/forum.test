@@ -178,6 +178,53 @@ class ForumApiIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void participatingExcludesOwnDiscussions() throws Exception {
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"username":"alice","password":"secret123"}
+                        """))
+                .andExpect(status().isCreated());
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"username":"bob","password":"secret123"}
+                        """))
+                .andExpect(status().isCreated());
+
+        String tokenAlice = login("alice", "secret123");
+        String tokenBob = login("bob", "secret123");
+
+        MvcResult res = mockMvc.perform(post("/api/discussions")
+                .header("Authorization", "Bearer " + tokenAlice)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"title":"Alice topic","content":"content"}
+                        """))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID discId = extractId(res);
+
+        createComment(tokenBob, discId, "Hola", null);
+
+        mockMvc.perform(get("/api/users/me/participating")
+                .header("Authorization", "Bearer " + tokenAlice))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+
+        mockMvc.perform(get("/api/users/me/participating")
+                .header("Authorization", "Bearer " + tokenBob))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(discId.toString()));
+
+        mockMvc.perform(get("/api/users/me/discussions")
+                .header("Authorization", "Bearer " + tokenBob))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
     private String login(String username, String password) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)

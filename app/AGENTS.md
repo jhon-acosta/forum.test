@@ -39,6 +39,7 @@ Base `http://localhost:8081`. Header `Authorization: Bearer {{token}}` tras `POS
 | POST | `/api/discussions` | crear discusión |
 | GET | `/api/discussions/{id}` | detalle con `maxReplyDepth` + `comments:[{replies:[]}]` |
 | GET | `/api/users/me/discussions` | mis discusiones |
+| GET | `/api/users/me/participating` | participando (comenté y no es mía) |
 | POST | `/api/discussions/{id}/comments` | crear comentario/reply (`content`, `parentId?`) |
 | GET | `/api/discussions/{id}/comments` | árbol alternativo |
 

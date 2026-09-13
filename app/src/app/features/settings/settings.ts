@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { API_BASE, SettingsResponse } from '../../core/api';
 import { AuthService } from '../../core/auth';
+import { AppHeader } from '../../shared/app-header';
 
 @Component({
   selector: 'app-settings',
-  imports: [RouterLink],
+  imports: [AppHeader],
   templateUrl: './settings.html',
 })
 export class Settings {

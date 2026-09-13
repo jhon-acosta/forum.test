@@ -60,7 +60,7 @@ exception/ ApiException, GlobalExceptionHandler (@RestControllerAdvice)
 - **Discussion:** `title` `@NotBlank @Size(max 150)`, `content` `@NotBlank @Size(max 10000)`.
 - **Comment:** `content` `@NotBlank @Size(max 5000)`, `parentId` nullable UUID que debe existir y pertenecer a la misma `discussionId`.
 
-## Endpoints expuestos (12)
+## Endpoints expuestos (13)
 
 | Método | Ruta | Auth | Request | Response | Códigos |
 |--------|------|------|---------|----------|---------|
@@ -74,6 +74,7 @@ exception/ ApiException, GlobalExceptionHandler (@RestControllerAdvice)
 | POST | `/api/discussions` | sí | `{title,content}` | `201 DiscussionResponse` | 400, 401 |
 | GET | `/api/discussions/{id}` | sí | — | `200 DiscussionResponse{maxReplyDepth, comments:[CommentResponse]}` | 400, 401, 404 |
 | GET | `/api/users/me/discussions` | sí | — | `200 [DiscussionSummary]` | 401 |
+| GET | `/api/users/me/participating` | sí | — | `200 [DiscussionSummary]` (participando, no mías) | 401 |
 | POST | `/api/discussions/{id}/comments` | sí | `{content,parentId?}` | `201 CommentResponse` | 400, 401, 404, 422 |
 | GET | `/api/discussions/{id}/comments` | sí | — | `200 [CommentResponse]` árbol | 401, 404 |
 

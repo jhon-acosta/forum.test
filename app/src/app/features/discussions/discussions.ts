@@ -14,6 +14,10 @@ export class DiscussionsService {
     return this.http.get<DiscussionSummary[]>(`${API_BASE}/users/me/discussions`);
   }
 
+  participating() {
+    return this.http.get<DiscussionSummary[]>(`${API_BASE}/users/me/participating`);
+  }
+
   get(id: string) {
     return this.http.get<DiscussionResponse>(`${API_BASE}/discussions/${id}`);
   }

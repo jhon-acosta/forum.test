@@ -2,10 +2,11 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormField, form, maxLength, required, submit } from '@angular/forms/signals';
 import { DiscussionsService } from './discussions';
+import { AppHeader } from '../../shared/app-header';
 
 @Component({
   selector: 'app-discussion-create',
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, AppHeader],
   templateUrl: './discussion-create.html',
 })
 export class DiscussionCreate {

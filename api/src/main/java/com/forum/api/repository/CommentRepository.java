@@ -20,4 +20,8 @@ public class CommentRepository extends JsonFileRepository<Comment, UUID> {
     public List<Comment> findByDiscussionId(UUID discussionId) {
         return findAll().stream().filter(comment -> comment.discussionId().equals(discussionId)).toList();
     }
+
+    public List<Comment> findByAuthorId(UUID authorId) {
+        return findAll().stream().filter(comment -> comment.authorId().equals(authorId)).toList();
+    }
 }

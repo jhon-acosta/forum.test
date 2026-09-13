@@ -49,4 +49,9 @@ public class UserController {
     public List<DiscussionSummary> myDiscussions(@AuthenticationPrincipal User user) {
         return discussionService.findByAuthorId(user.id());
     }
+
+    @GetMapping("/participating")
+    public List<DiscussionSummary> participating(@AuthenticationPrincipal User user) {
+        return discussionService.findParticipating(user.id());
+    }
 }

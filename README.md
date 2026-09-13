@@ -313,6 +313,10 @@ Validación: si presente y no null, `>=0` else `400 maxReplyDepth must be zero o
 
 - **200** `[DiscussionSummary]` filtradas por `authorId` del principal, orden desc. Prestada por `UserController` (`/api/users/me/discussions`).
 
+#### GET /api/users/me/participating — Participando
+
+- **200** `[DiscussionSummary]` donde el usuario ha comentado y **no es autor** (sin duplicados, orden `createdAt` desc). Usado por la pestaña “Participando”.
+
 ### Comentarios
 
 #### POST /api/discussions/{discussionId}/comments — Crear
@@ -501,8 +505,8 @@ POST ... {content:"E", parentId:D}   → 5 OK (ilimitado)
 
 **Stack:** Angular **22.1.6** (standalone, zoneless, OnPush), **Tailwind CSS 4.1.12** CSS-first (`@import 'tailwindcss'` + `@theme` en `src/styles.css`), **TypeScript 6.0**, **Vitest 4.1.11**, **pnpm 12.4.1**.
 
-**Estado:** Scaffold con `--style=tailwind --routing --ssr=false --zoneless --test-runner=vitest`, design tokens (`--color-canvas/surface/ink/muted/line/accent`, `--radius-card`, `--shadow-card`), `proxy.conf.json` → `8081`, core con `AuthService` (signals + `localStorage`), `tokenInterceptor`, `authGuard`/`guestGuard`, rutas protegidas (`/discussions` etc. redirigen a `/auth/login?returnUrl=`), y auth UI con **Signal Forms** (`form`, `FormField`, `required`, `minLength`, `submit`).
+**Estado:** Scaffold con `--style=tailwind --routing --ssr=false --zoneless --test-runner=vitest`, design tokens, `proxy.conf.json` → `8081`, core con `AuthService` (signals + `localStorage`), `tokenInterceptor`, `authGuard`/`guestGuard`, auth UI con **Signal Forms**, discusiones con **tabs `Todas (n)` · `Mías (n)` · `Participando (n)`** (conteos), detalle con árbol, creación, comentarios con `maxReplyDepth` y header compartido `Discusiones` con dropdown **Configuración** / **Cerrar sesión**.
 
-**Próximo:** discusiones, comentarios anidados y settings (ver `docs/plans/phase-2-app-plan.md`).
+**Completado:** discusiones, comentarios anidados, settings y tema (ver `docs/plans/phase-2-app-plan.md`).
 
 Verificación final (parcial): `./mvnw test` **42/42** (API) y `pnpm run build` + `npx ng test --watch=false` (App) en verde.

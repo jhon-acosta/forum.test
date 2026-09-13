@@ -3,7 +3,9 @@ package com.forum.api.service;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,7 @@ import com.forum.api.dto.discussion.DiscussionResponse;
 import com.forum.api.dto.discussion.DiscussionSummary;
 import com.forum.api.dto.user.AuthorResponse;
 import com.forum.api.exception.ApiException;
+import com.forum.api.model.Comment;
 import com.forum.api.model.Discussion;
 import com.forum.api.model.User;
 import com.forum.api.repository.CommentRepository;
@@ -64,6 +67,17 @@ public class DiscussionService {
 
     public List<DiscussionSummary> findByAuthorId(UUID authorId) {
         return discussionRepository.findByAuthorId(authorId).stream()
+                .sorted(Comparator.comparing(Discussion::createdAt).reversed())
+                .map(this::toSummary)
+                .toList();
+    }
+
+    public List<DiscussionSummary> findParticipating(UUID userId) {
+        Set<UUID> discussionIds = commentRepository.findByAuthorId(userId).stream()
+                .map(Comment::discussionId)
+                .collect(Collectors.toSet());
+        return discussionRepository.findAll().stream()
+                .filter(d -> discussionIds.contains(d.id()) && !d.authorId().equals(userId))
                 .sorted(Comparator.comparing(Discussion::createdAt).reversed())
                 .map(this::toSummary)
                 .toList();

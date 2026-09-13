@@ -1,43 +1,80 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DiscussionsService } from './discussions';
 import { DiscussionSummary } from '../../core/api';
-import { AuthService } from '../../core/auth';
 import { RelativeTimePipe } from '../../shared/relative-time';
+import { AppHeader } from '../../shared/app-header';
 
 @Component({
   selector: 'app-discussion-list',
-  imports: [RouterLink, RelativeTimePipe],
+  imports: [RouterLink, RelativeTimePipe, AppHeader],
   templateUrl: './discussion-list.html',
 })
 export class DiscussionList {
   private readonly discussionsService = inject(DiscussionsService);
-  protected readonly auth = inject(AuthService);
 
-  protected readonly discussions = signal<DiscussionSummary[]>([]);
+  protected readonly activeTab = signal<'all' | 'mine' | 'participating'>('all');
+
+  protected readonly all = signal<DiscussionSummary[]>([]);
+  protected readonly mine = signal<DiscussionSummary[]>([]);
+  protected readonly participating = signal<DiscussionSummary[]>([]);
+
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
 
+  protected readonly visible = computed(() => {
+    switch (this.activeTab()) {
+      case 'mine':
+        return this.mine();
+      case 'participating':
+        return this.participating();
+      default:
+        return this.all();
+    }
+  });
+
   constructor() {
-    this.load();
+    this.loadAll();
   }
 
-  private load() {
+  private loadAll() {
     this.loading.set(true);
     this.error.set(null);
+    let pending = 3;
+    const done = () => {
+      pending--;
+      if (pending === 0) this.loading.set(false);
+    };
+
     this.discussionsService.list().subscribe({
       next: (data) => {
-        this.discussions.set(data);
-        this.loading.set(false);
+        this.all.set(data);
+        done();
       },
       error: () => {
         this.error.set('No se pudieron cargar las discusiones');
-        this.loading.set(false);
+        done();
       },
+    });
+
+    this.discussionsService.my().subscribe({
+      next: (data) => {
+        this.mine.set(data);
+        done();
+      },
+      error: () => done(),
+    });
+
+    this.discussionsService.participating().subscribe({
+      next: (data) => {
+        this.participating.set(data);
+        done();
+      },
+      error: () => done(),
     });
   }
 
-  protected logout() {
-    this.auth.logout().subscribe();
+  protected setTab(tab: 'all' | 'mine' | 'participating') {
+    this.activeTab.set(tab);
   }
 }

@@ -1,10 +1,5 @@
 <div class="min-h-screen bg-canvas">
-  <header class="sticky top-0 z-10 bg-surface border-b border-line">
-    <div class="mx-auto max-w-4xl px-4 py-3 flex items-center justify-between">
-      <a routerLink="/discussions" class="text-lg font-semibold tracking-tight">Hilo</a>
-      <a routerLink="/discussions" class="text-sm text-muted hover:text-ink">Volver</a>
-    </div>
-  </header>
+  <app-header></app-header>
 
   <main class="mx-auto max-w-4xl px-4 py-8">
     @if (loading() && !discussion()) {

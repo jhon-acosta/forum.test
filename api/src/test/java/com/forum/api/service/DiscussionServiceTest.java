@@ -140,4 +140,27 @@ class DiscussionServiceTest {
         assertThat(result).hasSize(1);
         assertThat(result.get(0).id()).isEqualTo(discussion.id());
     }
+
+    @Test
+    void findParticipatingExcludesOwnDiscussions() {
+        UUID userId = UUID.randomUUID();
+        UUID otherAuthor = UUID.randomUUID();
+        LocalDateTime now = LocalDateTime.now();
+        Discussion own = discussion(UUID.randomUUID(), userId, now.minusDays(1));
+        Discussion other = discussion(UUID.randomUUID(), otherAuthor, now);
+        User otherUser = user(otherAuthor, "other");
+
+        when(commentRepository.findByAuthorId(userId)).thenReturn(List.of(
+                new com.forum.api.model.Comment(UUID.randomUUID(), own.id(), null, userId, "c", now),
+                new com.forum.api.model.Comment(UUID.randomUUID(), other.id(), null, userId, "c", now)));
+        when(discussionRepository.findAll()).thenReturn(List.of(own, other));
+        when(userRepository.findById(otherAuthor)).thenReturn(Optional.of(otherUser));
+        when(commentRepository.findByDiscussionId(other.id())).thenReturn(List.of(
+                new com.forum.api.model.Comment(UUID.randomUUID(), other.id(), null, userId, "c", now)));
+
+        List<DiscussionSummary> result = discussionService().findParticipating(userId);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).id()).isEqualTo(other.id());
+    }
 }
