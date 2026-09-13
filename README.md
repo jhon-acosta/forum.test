@@ -153,7 +153,7 @@ Regla de nivel: `discusión=0, direct=1, reply=2…`. El árbol se construye en 
 
 ### DTOs expuestos (nunca `passwordHash`)
 
-`RegisterRequest{username,password}`, `LoginRequest{username,password}`, `AuthResponse{token, user:UserResponse}`, `UserResponse{id,username,maxReplyDepth,createdAt}`, `AuthorResponse{id,username}`, `SettingsResponse{maxReplyDepth}`, `UpdateUserSettingsRequest{Optional<Integer> maxReplyDepth}`, `CreateDiscussionRequest{title,content}`, `DiscussionSummary{id,title,content,author,commentCount,createdAt}`, `DiscussionResponse{id,title,content,author,createdAt,comments:[CommentResponse]}`, `CreateCommentRequest{content,parentId?}`, `CommentResponse{id,parentId,content,author,createdAt,replies:[]}`.
+`RegisterRequest{username,password}`, `LoginRequest{username,password}`, `AuthResponse{token, user:UserResponse}`, `UserResponse{id,username,maxReplyDepth,createdAt}`, `AuthorResponse{id,username}`, `SettingsResponse{maxReplyDepth}`, `UpdateUserSettingsRequest{Optional<Integer> maxReplyDepth}`, `CreateDiscussionRequest{title,content}`, `DiscussionSummary{id,title,content,author,commentCount,createdAt}`, `DiscussionResponse{id,title,content,author,maxReplyDepth,createdAt,comments:[CommentResponse]}`, `CreateCommentRequest{content,parentId?}`, `CommentResponse{id,parentId,content,author,createdAt,replies:[]}`.
 
 ---
 

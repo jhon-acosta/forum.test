@@ -42,6 +42,7 @@ export interface DiscussionResponse {
   title: string;
   content: string;
   author: AuthorResponse;
+  maxReplyDepth: number | null;
   createdAt: string;
   comments: CommentResponse[];
 }

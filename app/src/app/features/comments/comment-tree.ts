@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { CommentResponse } from '../../core/api';
 import { RelativeTimePipe } from '../../shared/relative-time';
+import { canReplyAt } from '../../shared/depth';
 import { CommentComposer } from './comment-composer';
 
 @Component({
@@ -12,6 +13,7 @@ export class CommentTree {
   @Input({ required: true }) comments: CommentResponse[] = [];
   @Input({ required: true }) discussionId = '';
   @Input() level = 0;
+  @Input() maxReplyDepth: number | null = null;
   @Output() created = new EventEmitter<void>();
 
   protected readonly replyingTo = signal<string | null>(null);
@@ -23,5 +25,9 @@ export class CommentTree {
   protected onCreated() {
     this.replyingTo.set(null);
     this.created.emit();
+  }
+
+  protected canReply(level: number): boolean {
+    return canReplyAt(this.maxReplyDepth, level);
   }
 }

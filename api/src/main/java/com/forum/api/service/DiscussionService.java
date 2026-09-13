@@ -91,6 +91,7 @@ public class DiscussionService {
                 discussion.title(),
                 discussion.content(),
                 AuthorResponse.from(author),
+                author.maxReplyDepth(),
                 discussion.createdAt(),
                 comments);
     }

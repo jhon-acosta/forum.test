@@ -70,6 +70,7 @@ class DiscussionServiceTest {
         assertThat(saved.authorId()).isEqualTo(authorId);
         assertThat(response.title()).isEqualTo("Hello");
         assertThat(response.author().username()).isEqualTo("jhon");
+        assertThat(response.maxReplyDepth()).isEqualTo(3);
         assertThat(response.comments()).isEmpty();
     }
 
@@ -111,6 +112,7 @@ class DiscussionServiceTest {
 
         assertThat(response.id()).isEqualTo(discussion.id());
         assertThat(response.author().username()).isEqualTo("jhon");
+        assertThat(response.maxReplyDepth()).isEqualTo(3);
     }
 
     @Test

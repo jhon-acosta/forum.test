@@ -13,17 +13,19 @@
     </div>
     <p class="mt-1 text-sm leading-relaxed whitespace-pre-wrap">{{ comment.content }}</p>
     <div class="mt-2 flex items-center gap-3">
-      <button
-        type="button"
-        (click)="toggleReply(comment.id)"
-        class="text-xs text-accent hover:text-accent-strong font-medium"
-      >
-        @if (replyingTo() === comment.id) {
-          Cancelar
-        } @else {
-          Responder
-        }
-      </button>
+      @if (canReply(level)) {
+        <button
+          type="button"
+          (click)="toggleReply(comment.id)"
+          class="text-xs text-accent hover:text-accent-strong font-medium"
+        >
+          @if (replyingTo() === comment.id) {
+            Cancelar
+          } @else {
+            Responder
+          }
+        </button>
+      }
       @if (comment.replies.length > 0) {
         <span class="text-xs text-muted">{{ comment.replies.length }} respuestas</span>
       }
@@ -48,6 +50,7 @@
           [comments]="comment.replies"
           [discussionId]="discussionId"
           [level]="level + 1"
+          [maxReplyDepth]="maxReplyDepth"
           (created)="created.emit()"
         ></app-comment-tree>
       </div>

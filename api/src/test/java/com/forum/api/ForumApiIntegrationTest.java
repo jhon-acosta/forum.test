@@ -75,6 +75,8 @@ class ForumApiIntegrationTest {
                         {"title":"Hello World","content":"First discussion"}
                         """))
                 .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.maxReplyDepth").value(3))
+                .andExpect(jsonPath("$.author.username").value("owner"))
                 .andReturn();
         UUID discussionId = extractId(discussionResult);
 
@@ -95,6 +97,12 @@ class ForumApiIntegrationTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.message").value("Maximum reply depth exceeded"));
 
+        // verify discussion has maxReplyDepth 3 before change
+        mockMvc.perform(get("/api/discussions/" + discussionId)
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.maxReplyDepth").value(3));
+
         // change to unlimited
         mockMvc.perform(patch("/api/users/me/settings")
                 .header("Authorization", "Bearer " + token)
@@ -110,10 +118,11 @@ class ForumApiIntegrationTest {
         // level 5 also succeeds
         createComment(token, discussionId, "level 5 unlimited", c4);
 
-        // verify tree is nested
+        // verify tree is nested and maxReplyDepth is now unlimited (null)
         mockMvc.perform(get("/api/discussions/" + discussionId)
                 .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.maxReplyDepth").doesNotExist())
                 .andExpect(jsonPath("$.comments").isArray())
                 .andExpect(jsonPath("$.comments[0].replies[0].replies[0].replies[0].content")
                         .value("level 4 unlimited"));

@@ -12,6 +12,7 @@ public record DiscussionResponse(
         String title,
         String content,
         AuthorResponse author,
+        Integer maxReplyDepth,
         LocalDateTime createdAt,
         List<CommentResponse> comments) {
 }

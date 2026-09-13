@@ -37,12 +37,12 @@ Base `http://localhost:8081`. Header `Authorization: Bearer {{token}}` tras `POS
 | GET/PATCH | `/api/users/me/settings` | `maxReplyDepth` (number\|null, absent=no cambia) |
 | GET | `/api/discussions` | feed |
 | POST | `/api/discussions` | crear discusión |
-| GET | `/api/discussions/{id}` | detalle con `comments:[{replies:[]}]` |
+| GET | `/api/discussions/{id}` | detalle con `maxReplyDepth` + `comments:[{replies:[]}]` |
 | GET | `/api/users/me/discussions` | mis discusiones |
 | POST | `/api/discussions/{id}/comments` | crear comentario/reply (`content`, `parentId?`) |
 | GET | `/api/discussions/{id}/comments` | árbol alternativo |
 
-Modelos: `UserResponse{id,username,maxReplyDepth,createdAt}`, `DiscussionSummary/Response`, `CommentResponse{id,parentId,content,author,createdAt,replies:[]}`. Errores en `{timestamp,status,error,message,path,details[]}` (ej. `422 Maximum reply depth exceeded`).
+Modelos: `UserResponse{id,username,maxReplyDepth,createdAt}`, `DiscussionResponse{id,title,content,author,maxReplyDepth,createdAt,comments}`, `DiscussionSummary`, `CommentResponse{id,parentId,content,author,createdAt,replies:[]}`. Errores en `{timestamp,status,error,message,path,details[]}` (ej. `422 Maximum reply depth exceeded`).
 
 ## Estructura (naming 2025 — conciso)
 

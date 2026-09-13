@@ -43,7 +43,7 @@ controller -> service -> repository -> JSON files
 ```
 config/  ForumProperties, JacksonConfig (JsonMapperBuilderCustomizer), CorsConfig, SecurityConfig, TokenAuthenticationFilter, RestAuthenticationEntryPoint, RestAccessDeniedHandler
 model/   User(id,username,passwordHash,maxReplyDepth,createdAt), Discussion(id,title,content,authorId,createdAt), Comment(id,discussionId,parentId,authorId,content,createdAt), AuthToken(token,userId,createdAt)
-dto/     auth/RegisterRequest,LoginRequest,AuthResponse | user/UserResponse,AuthorResponse,SettingsResponse,UpdateUserSettingsRequest(Optional<Integer>) | discussion/CreateDiscussionRequest,DiscussionSummary,DiscussionResponse | comment/CreateCommentRequest,CommentResponse | error/ApiErrorResponse,FieldValidationError
+dto/     auth/RegisterRequest,LoginRequest,AuthResponse | user/UserResponse,AuthorResponse,SettingsResponse,UpdateUserSettingsRequest(Optional<Integer>) | discussion/CreateDiscussionRequest,DiscussionSummary,DiscussionResponse(maxReplyDepth) | comment/CreateCommentRequest,CommentResponse | error/ApiErrorResponse,FieldValidationError
 repository/ JsonFileRepository<T,ID> + UserRepository, DiscussionRepository, CommentRepository, TokenRepository
 service/  AuthService, TokenService, UserService, DiscussionService, CommentService
 controller/ AuthController, UserController, DiscussionController, CommentController
@@ -72,7 +72,7 @@ exception/ ApiException, GlobalExceptionHandler (@RestControllerAdvice)
 | PATCH | `/api/users/me/settings` | sí | `{maxReplyDepth:number\|null}` (absent=no cambia) | `200 {maxReplyDepth}` | 400, 401 |
 | GET | `/api/discussions` | sí | — | `200 [DiscussionSummary]` | 401 |
 | POST | `/api/discussions` | sí | `{title,content}` | `201 DiscussionResponse` | 400, 401 |
-| GET | `/api/discussions/{id}` | sí | — | `200 DiscussionResponse{comments:[CommentResponse]}` | 400, 401, 404 |
+| GET | `/api/discussions/{id}` | sí | — | `200 DiscussionResponse{maxReplyDepth, comments:[CommentResponse]}` | 400, 401, 404 |
 | GET | `/api/users/me/discussions` | sí | — | `200 [DiscussionSummary]` | 401 |
 | POST | `/api/discussions/{id}/comments` | sí | `{content,parentId?}` | `201 CommentResponse` | 400, 401, 404, 422 |
 | GET | `/api/discussions/{id}/comments` | sí | — | `200 [CommentResponse]` árbol | 401, 404 |

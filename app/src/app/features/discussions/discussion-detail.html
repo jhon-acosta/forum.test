@@ -22,12 +22,19 @@
 
       <section class="mt-8">
         <h2 class="text-base font-semibold mb-4">Comentarios ({{ d.comments.length }})</h2>
-        <app-comment-composer [discussionId]="d.id" (created)="onCommentCreated()"></app-comment-composer>
+        @if (d.maxReplyDepth === null || d.maxReplyDepth >= 1) {
+          <app-comment-composer [discussionId]="d.id" (created)="onCommentCreated()"></app-comment-composer>
+        }
         <div class="mt-6">
           @if (d.comments.length === 0) {
             <p class="text-sm text-muted">Sé el primero en comentar.</p>
           } @else {
-            <app-comment-tree [comments]="d.comments" [discussionId]="d.id" (created)="onCommentCreated()"></app-comment-tree>
+            <app-comment-tree
+              [comments]="d.comments"
+              [discussionId]="d.id"
+              [maxReplyDepth]="d.maxReplyDepth"
+              (created)="onCommentCreated()"
+            ></app-comment-tree>
           }
         </div>
       </section>
