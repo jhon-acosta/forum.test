@@ -2,7 +2,7 @@
 
 Prueba técnica Full Stack con IA asistida. Monorepo `api/` (Spring Boot) + `app/` (Angular) con persistencia en archivos JSON y nivel de anidación configurable por el dueño de la discusión.
 
-> **Estado actual:** Fase 1 (API) **completada y probada** (`./mvnw test` 42/42) en **http://localhost:8081**. Fase 2 (Angular 22 + Tailwind) **en curso** (scaffold, design tokens, auth, discusiones, comentarios y settings implementados; ver `app/`).
+> **Estado actual:** Fase 1 (API) **completada y probada** (`./mvnw test` 44/44) en **http://localhost:8081**. Fase 2 (Angular 22 + Tailwind) **completada** (auth con usuario normalizado, discusiones con tabs Todas/Mías/Participando, comentarios anidados con profundidad configurable, header `#0a2240` + notificaciones overlay centradas).
 
 ---
 
@@ -69,7 +69,10 @@ SERVER_PORT=8081 ./mvnw spring-boot:run
 ```bash
 cd api
 ./mvnw test
-# 42 tests: 1 smoke + 9 JsonFileRepository + 3 Settings deserialización + 7 Auth + 6 User + 5 Discussion + 8 Comment + 3 E2E
+# 44 tests: 1 smoke + 9 JsonFileRepository + 3 Settings deserialización + 7 Auth + 6 User + 6 Discussion + 8 Comment + 4 E2E
+cd app
+pnpm run build && npx ng test --watch=false
+# 8 tests Vitest (depth + app)
 ```
 
 ### Bruno (colección HTTP)
@@ -86,13 +89,12 @@ cd api
 ./marvel-test.sh  # registra tony/natasha/bruce, 3 discusiones Marvel, nivel 1→3, 422→ilimitado, árbol
 ```
 
-### Frontend (Fase 2, pendiente)
+### Frontend (Fase 2, completada)
 
 ```bash
 cd app
-npx @angular/cli new . --routing --style=css  # cuando se retome
-npm install
-npm start  # http://localhost:4200 (CORS ya permite 4200 -> 8081)
+pnpm install
+pnpm start  # http://localhost:4200 (proxy /api -> 8081)
 ```
 
 ---
@@ -501,12 +503,12 @@ POST ... {content:"E", parentId:D}   → 5 OK (ilimitado)
 
 ---
 
-## Fase 2 — App Angular (en curso)
+## Fase 2 — App Angular (completada)
 
 **Stack:** Angular **22.1.6** (standalone, zoneless, OnPush), **Tailwind CSS 4.1.12** CSS-first (`@import 'tailwindcss'` + `@theme` en `src/styles.css`), **TypeScript 6.0**, **Vitest 4.1.11**, **pnpm 12.4.1**.
 
-**Estado:** Scaffold con `--style=tailwind --routing --ssr=false --zoneless --test-runner=vitest`, design tokens, `proxy.conf.json` → `8081`, core con `AuthService` (signals + `localStorage`), `tokenInterceptor`, `authGuard`/`guestGuard`, auth UI con **Signal Forms**, discusiones con **tabs `Todas (n)` · `Mías (n)` · `Participando (n)`** (conteos), detalle con árbol, creación, comentarios con `maxReplyDepth` y header compartido `Discusiones` con dropdown **Configuración** / **Cerrar sesión**.
+**Estado:** Scaffold con `--style=tailwind --routing --ssr=false --zoneless --test-runner=vitest`, design tokens (`#0a2240` header, acento dorado), `proxy.conf.json` → `8081`, core con `AuthService` (usuario normalizado a minúsculas sin espacios), `tokenInterceptor`, `authGuard`/`guestGuard`, notificaciones overlay centradas (3 s), auth UI con **Signal Forms**, discusiones con **tabs `Todas (n)` · `Mías (n)` · `Participando (n)`**, detalle con árbol y `Volver` ↔ `Comentar`, creación con `Cancelar` ↔ `Crear`, comentarios con `maxReplyDepth` y header `Discusiones` con dropdown **Configuración** / **Cerrar sesión**.
 
-**Completado:** discusiones, comentarios anidados, settings y tema (ver `docs/plans/phase-2-app-plan.md`).
+**Completado:** discusiones, comentarios anidados, settings con `hasChanges` y tema Aval Buró (ver `docs/plans/phase-2-app-plan.md`).
 
-Verificación final (parcial): `./mvnw test` **42/42** (API) y `pnpm run build` + `npx ng test --watch=false` (App) en verde.
+Verificación final: `./mvnw test` **44/44** (API) y `pnpm run build` + `npx ng test --watch=false` (8 tests App) en verde.

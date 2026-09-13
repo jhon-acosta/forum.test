@@ -1,59 +1,47 @@
-# ForumApp
+# Forum App — Angular 22 + Tailwind + Signal Forms
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.8.
+Frontend del foro `forum.test` (Fase 2). Consume la API Spring Boot en `http://localhost:8081` con persistencia JSON y profundidad configurable.
 
-## Development server
+## Stack
 
-To start a local development server, run:
+- **Angular 22.1.6** (standalone, zoneless, OnPush por defecto) + CLI 22.1.8 + TypeScript 6.0
+- **Tailwind CSS 4.1.12** CSS-first (`@import 'tailwindcss'` + `@theme` en `src/styles.css`)
+- **Vitest 4.1.11** + `jsdom` + `pnpm 12.4.1`
+- **Signal Forms** (`@angular/forms/signals`) + `localStorage` + `HttpInterceptor`
 
-```bash
-ng serve
-```
+## Requisitos
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Node `22.22.3` (vía `fnm`), `pnpm`, API en `:8081`
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Comandos
 
 ```bash
-ng generate --help
+cd app
+pnpm install                    # instala
+pnpm approve-builds --all       # si pide aprobar esbuild/@parcel
+pnpm run build                  # ng build -> dist/forum-app
+pnpm exec ng test --watch=false # Vitest
+pnpm start                      # ng serve -> http://localhost:4200 (proxy /api -> 8081)
 ```
 
-## Building
+## Estructura
 
-To build the project run:
-
-```bash
-ng build
+```
+src/app/
+├── app.ts/html/css, app.config.ts (zoneless+HttpClient), app.routes.ts
+├── core/ api.ts (13 endpoints), auth.ts (signals+normaliza usuario), token.interceptor.ts, auth.guard.ts, guest.guard.ts, notification.ts
+├── shared/ app-header.ts/.html (#0a2240), relative-time.ts, depth.ts, notification-host.ts/.html
+└── features/
+    ├── auth/ login, register (Signal Forms, minúsculas sin espacios)
+    ├── discussions/ discussion-list (tabs Todas/Mías/Participando), discussion-detail (árbol), discussion-create, discussions.ts
+    ├── comments/ comment-tree (recursivo), comment-composer (Volver↔Comentar), comments.ts
+    └── settings/ settings (cards 3/5/ilimitado, badge, hasChanges)
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Integración API (8081)
 
-## Running unit tests
+`proxy.conf.json` (`/api` → `http://localhost:8081`). 13 endpoints; usuario siempre en minúsculas sin espacios (`^[a-z0-9._-]+$`).
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Tema
 
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+`src/styles.css` `@theme` con `--color-ink #0a2240` (header), `--color-accent` dorado, `--radius-card`, `--shadow-card`. Notificaciones overlay centradas arriba (3 s).

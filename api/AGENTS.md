@@ -56,7 +56,7 @@ exception/ ApiException, GlobalExceptionHandler (@RestControllerAdvice)
 
 ## Modelo y validaciones (preciso)
 
-- **User:** `username` `@NotBlank @Size(3..30)` único `trim()`, `password` `@NotBlank @Size(6..100)` → BCrypt, `maxReplyDepth` Integer `>=0` o `null` (default 3).
+- **User:** `username` normalizado `trim`+`toLowerCase`+sin espacios, `@NotBlank @Size(3..30)` y `^[a-z0-9._-]+$` (validado tras normalizar), único case-insensitive, `password` `@NotBlank @Size(6..100)` → BCrypt, `maxReplyDepth` `Integer|null` `>=0` o `null` (default 3).
 - **Discussion:** `title` `@NotBlank @Size(max 150)`, `content` `@NotBlank @Size(max 10000)`.
 - **Comment:** `content` `@NotBlank @Size(max 5000)`, `parentId` nullable UUID que debe existir y pertenecer a la misma `discussionId`.
 
@@ -86,9 +86,9 @@ exception/ ApiException, GlobalExceptionHandler (@RestControllerAdvice)
 - `UserRepository.findByUsername/existsByUsername`, `DiscussionRepository.findByAuthorId`, `CommentRepository.findByDiscussionId`, `TokenRepository(String)`.
 - `BCryptPasswordEncoder`, token opaco `UUID.randomUUID().toString()` en `tokens.json`, `TokenAuthenticationFilter extends OncePerRequestFilter` → `UsernamePasswordAuthenticationToken(User, null, [])` en `SecurityContext` (`@AuthenticationPrincipal User`), `SecurityFilterChain` stateless, CSRF off, CORS on, `RestAuthenticationEntryPoint` 401 y `RestAccessDeniedHandler` 403 escriben `ApiErrorResponse` vía `JsonMapper.writeValueAsString`.
 
-## Pruebas (42)
+## Pruebas (44)
 
-- `ForumApiApplicationTests` 1, `JsonFileRepositoryTest` 9 (concurrencia 8×10), `UpdateUserSettingsRequestTest` 3, `AuthServiceTest` 7, `UserServiceTest` 6, `DiscussionServiceTest` 5, `CommentServiceTest` 8 (niveles), `ForumApiIntegrationTest` 3 (`@SpringBootTest` + `MockMvc` en `:8081`, `target/test-data`, flujo E2E con `422→PATCH null→nivel 4/5`).
+- `ForumApiApplicationTests` 1, `JsonFileRepositoryTest` 9, `UpdateUserSettingsRequestTest` 3, `AuthServiceTest` 7, `UserServiceTest` 6, `DiscussionServiceTest` 6, `CommentServiceTest` 8, `ForumApiIntegrationTest` 4 (incluye `participatingExcludesOwnDiscussions`).
 
 ## Convenciones
 

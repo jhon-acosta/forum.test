@@ -9,7 +9,9 @@ Guía para agentes de IA y desarrolladores que trabajen en el frontend.
 - **Vitest 4.1.11** (runner por defecto) + `jsdom`.
 - **pnpm 12.4.1** (`packageManager` `pnpm@12.4.1`, `pnpm-workspace.yaml` con `allowBuilds`).
 - Estado de sesión con token opaco en `localStorage` (`forum_token`, `forum_user`) + `HttpInterceptor` (`Authorization: Bearer`).
-- **Backend listo:** `http://localhost:8081` (ver `bruno/forum-api` y `marvel-test.sh`). 12 endpoints bajo `/api`; CORS permite `http://localhost:4200` → `8081`.
+- Usuario siempre en minúsculas sin espacios (sanitizado en registro/login y validado en API `^[a-z0-9._-]+$`).
+- Notificaciones overlay centradas arriba (`NotificationService` + `NotificationHost`, 3 s, `success`/`error`).
+- **Backend listo:** `http://localhost:8081` (ver `bruno/forum-api` y `marvel-test.sh`). 13 endpoints bajo `/api`; CORS permite `http://localhost:4200` → `8081`.
 
 ## Comandos
 

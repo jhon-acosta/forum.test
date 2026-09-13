@@ -1,140 +1,103 @@
-# Plan Fase 2 — App Angular (para otro agente)
+# Plan — Fase 2: App Angular — Estado final
 
-> Documento autocontenido para ejecutar la Fase 2 sin contexto previo. `app/` solo contenía `AGENTS.md`; la API (Fase 1) está en `http://localhost:8081`.
+> Refleja lo ya construido (Angular 22.1.6 + Tailwind 4 + Signal Forms + Vitest) y documenta cómo reproducirlo. No modifica la API.
 
-## 0. Reglas de trabajo
+## 1. Objetivo y arquitectura
 
-1. Trabajo por pasos (sección 6). Al terminar cada paso: verificación y detenerse.
-2. Cada commit requiere aprobación explícita.
-3. `git push` solo al final con confirmación.
-4. Conventional Commits (`feat|fix|test|docs|chore|style|refactor`).
-5. No añadir comentarios al código.
-6. Cada feature incluye sus pruebas (Vitest).
-7. No tocar `api/` salvo que el paso lo indique.
-
-## 1. Contexto
-
-```
-forum.test/
-├── README.md
-├── .gitignore
-├── api/ (Spring Boot 4.1.1, NO TOCAR)
-├── app/ (AGENTS.md)
-├── bruno/forum-api/ (host 8081)
-├── marvel-test.sh (tony/natasha/bruce secret123)
-└── docs/{prompts,plans}
-```
-
-Entorno: Node 22.22.3, pnpm 12.4.1, Angular CLI 22.1.8, Tailwind 4.3.3, API :8081.
+App foro en monorepo `app/` que consume la API de Fase 1 en `http://localhost:8081` (proxy `/api`→8081 en `ng serve`). Diseño profesional con tokens propios, rutas protegidas y árbol de comentarios recursivo.
 
 ## 2. Decisiones fijadas
 
-| Tema | Decisión |
+| Tema | Decisión final |
 |---|---|
-| Framework | Angular 22.1.x (standalone, zoneless, OnPush) |
-| Estilos | Tailwind 4 CSS-first (`--style=tailwind`, sin SCSS) |
-| Naming | 2025 (`app.ts`, `auth.ts`) |
-| Formularios | Signal Forms (`@angular/forms/signals`) |
-| Sesión | `localStorage` (`forum_token`, `forum_user`) |
-| Tests | Vitest |
-| SSR | deshabilitado |
-| Router | Guards funcionales + redirect |
-| Http | `provideHttpClient(withInterceptors([tokenInterceptor]))` (sin `withFetch()`) |
+| Framework | Angular 22.1.6 (standalone, zoneless, OnPush por defecto), CLI 22.1.8, TypeScript 6.0 |
+| Estilos | Tailwind CSS 4.1.12 CSS-first (`@import 'tailwindcss'` + `@theme` en `src/styles.css`), `.postcssrc.json` con `@tailwindcss/postcss` |
+| Naming | `file-name-style-guide=2025` (`app.ts`, `auth.ts`) |
+| Formularios | Signal Forms (`@angular/forms/signals`: `form`, `FormField`, `required`, `minLength`, `pattern`, `submit`) |
+| Estado | `localStorage` (`forum_token`, `forum_user`) + `signal`/`computed` + `httpResource`/`HttpClient` |
+| Router | Guards funcionales `authGuard`/`guestGuard`, `returnUrl` saneada (`/…` y no `//`) |
+| Http | `provideHttpClient(withInterceptors([tokenInterceptor]))` (sin `withFetch()` deprecado) |
+| Tests | Vitest 4.1.11 + `jsdom`, `TestBed` zoneless |
+| Package | `pnpm 12.4.1` (`pnpm-workspace.yaml` con `allowBuilds` para `esbuild`, `@parcel/watcher`) |
+| Palette | `#0a2240` header (`--color-ink`), acento dorado, texto `ink` sobre accent; `Inter` + `JetBrains Mono` |
 
-## 3. Contrato de API (base `http://localhost:8081`)
-
-| Método | Ruta | Auth | Request | Response | Errores |
-|---|---|---|---|---|---|
-| POST | `/api/auth/register` | no | `{username,password}` | 201 `UserResponse` | 400, 409 |
-| POST | `/api/auth/login` | no | `{username,password}` | 200 `AuthResponse` | 401 |
-| POST | `/api/auth/logout` | sí | — | 204 | 401 |
-| GET | `/api/users/me` | sí | — | 200 `UserResponse` | 401 |
-| GET/PATCH | `/api/users/me/settings` | sí | `{maxReplyDepth: number\|null}` | 200 `SettingsResponse` | 400, 401 |
-| GET | `/api/discussions` | sí | — | 200 `DiscussionSummary[]` | 401 |
-| POST | `/api/discussions` | sí | `{title,content}` | 201 `DiscussionResponse` | 400, 401 |
-| GET | `/api/discussions/{id}` | sí | — | 200 `DiscussionResponse` (árbol) | 400, 401, 404 |
-| GET | `/api/users/me/discussions` | sí | — | 200 `DiscussionSummary[]` | 401 |
-| POST | `/api/discussions/{id}/comments` | sí | `{content,parentId?}` | 201 `CommentResponse` | 400, 401, 404, 422 |
-| GET | `/api/discussions/{id}/comments` | sí | — | 200 `CommentResponse[]` | 401, 404 |
-
-Modelos TS en `core/api.ts` (ver sección 5 del plan original).
-
-## 4. Estructura objetivo
+## 3. Estructura
 
 ```
 app/
-├── angular.json, package.json, .postcssrc.json, proxy.conf.json
-├── src/styles.css (@import "tailwindcss"; @theme)
-└── src/app/
-    ├── app.ts/html/css, app.config.ts, app.routes.ts
-    ├── core/ api.ts, auth.ts, token.interceptor.ts, auth.guard.ts, guest.guard.ts
-    ├── features/auth/ login.ts/.html, register.ts/.html
-    ├── features/discussions/ discussion-list.ts/.html, discussion-detail.ts/.html, discussion-create.ts/.html, discussions.ts
-    ├── features/comments/ comment-tree.ts/.html, comment-composer.ts/.html, comments.ts
-    ├── features/settings/ settings.ts/.html
-    └── shared/ relative-time.ts
+├── angular.json, package.json, .postcssrc.json, proxy.conf.json, tsconfig*.json
+├── public/favicon.ico
+└── src/
+    ├── styles.css (@import "tailwindcss"; @theme con --color-ink #0a2240, --color-accent, --radius-card, --shadow-card)
+    ├── main.ts, index.html
+    └── app/
+        ├── app.ts/html/css, app.config.ts (zoneless + HttpClient + Router), app.routes.ts
+        ├── core/ api.ts (13 endpoints), auth.ts (signals + normaliza usuario), token.interceptor.ts, auth.guard.ts, guest.guard.ts, notification.ts
+        ├── shared/ app-header.ts/.html (Discusiones + dropdown Configuración/Cerrar sesión), relative-time.ts, depth.ts, notification-host.ts/.html, toast-container
+        └── features/
+            ├── auth/ login.ts/.html, register.ts/.html (Signal Forms, pattern minúsculas, notificación overlay)
+            ├── discussions/ discussion-list.ts/.html (tabs Todas/Mías/Participando con conteos), discussion-detail.ts/.html (árbol + composer con showVolver), discussion-create.ts/.html (Cancelar ↔ Crear), discussions.ts (list/my/participating/get/create)
+            ├── comments/ comment-tree.ts/.html (recursivo, canReplyAt), comment-composer.ts/.html (showVolver), comments.ts
+            └── settings/ settings.ts/.html (cards 3/5/Ilimitado, badge, hasChanges, notificación)
 ```
 
-## 5. Pasos
+## 4. Contrato de API consumido (13 endpoints)
 
-### Paso 1 — Scaffold
+| Método | Ruta | Uso |
+|---|---|---|
+| POST | `/api/auth/register` | registro (username normalizado) |
+| POST | `/api/auth/login` | guarda `token` |
+| POST | `/api/auth/logout` | limpia |
+| GET | `/api/users/me` | perfil |
+| GET/PATCH | `/api/users/me/settings` | `maxReplyDepth` |
+| GET | `/api/discussions` | Todas |
+| GET | `/api/users/me/discussions` | Mías |
+| GET | `/api/users/me/participating` | Participando (comenté y no es mía) |
+| POST | `/api/discussions` | crear |
+| GET | `/api/discussions/{id}` | detalle `{maxReplyDepth, comments}` |
+| POST | `/api/discussions/{id}/comments` | crear (`parentId?`) → 422 si límite |
+| GET | `/api/discussions/{id}/comments` | árbol |
 
-```bash
-mkdir -p /tmp/opencode/forum-scaffold && cd /tmp/opencode/forum-scaffold
-NG_CLI_ANALYTICS=false npx @angular/cli@22.1.8 new forum-app \
-  --style=tailwind --routing --ssr=false --zoneless \
-  --test-runner=vitest --package-manager=npm --skip-git \
-  --file-name-style-guide=2025 --ai-config=none --skip-install
-cp -a forum-app/. /path/app/  # preservar AGENTS.md
-cd /path/app && pnpm install # requiere Node >=22.22.3 (usar fnm)
+## 5. Rutas y guards
+
+```ts
+'' -> redirectTo 'discussions'
+'auth/login', 'auth/register' canActivate [guestGuard] -> redirectTo 'discussions' si autenticado
+'discussions', 'discussions/new', 'discussions/:id', 'settings' canActivate [authGuard] -> redirectTo '/auth/login?returnUrl=...'
+'**' -> 'discussions'
 ```
 
-Commit: `chore(app): scaffold Angular 22 with Tailwind, routing and Vitest`
+## 6. UI y UX profesional
 
-### Paso 2 — Tema + proxy
+- **Header** `Discusiones` en `bg-ink #0a2240 text-white` con dropdown `Configuración`/`Cerrar sesión` (texto `ink` sobre `surface`).
+- **Tabs** `Todas (n)`/`Mías (n)`/`Participando (n)` con conteos y activo `bg-accent text-ink`.
+- **Settings**: cards con descripción, badge `Actual: Ilimitado` (sin `null` crudo), `Guardar cambios` deshabilitado sin cambios.
+- **Navegación**: `← Volver` opuesto a `Comentar` debajo del input; `Cancelar` opuesto a `Crear` (patrón primario derecha).
+- **Notificaciones**: overlay centrado arriba (`NotificationHost` en `app.html`, 3s, `success`/`error`).
+- **Username**: siempre `toLowerCase` + sin espacios (front sanitiza, API valida con `^[a-z0-9._-]+$`).
 
-`src/styles.css` con `@theme` (tokens --color-canvas/surface/ink/muted/line/accent, --radius-card, --shadow-card) y `proxy.conf.json` (`/api` → 8081) + `angular.json` `proxyConfig` y `packageManager: pnpm`.
+## 7. Persistencia y validación de usuario
 
-Commit: `chore(app): configure Tailwind design tokens and dev proxy`
+- Registro/login normalizan `username` (`replace \s + toLowerCase`); unicidad case-insensitive; `409 El nombre de usuario ya existe` como toast.
 
-### Paso 3 — Core
+## 8. Pruebas App — 8 (Vitest)
 
-`core/api.ts`, `core/auth.ts` (signals + localStorage), `core/token.interceptor.ts`, `core/auth.guard.ts`, `core/guest.guard.ts`, `app.config.ts` (`provideHttpClient(withInterceptors)`), `app.routes.ts` (lazy `loadComponent` con guards).
+- `app.spec.ts` (router-outlet), `depth.spec.ts` (canReplyAt/canComment), + `NotificationService`/`notification-host` y `AppHeader`.
 
-Commit: `feat(app): add auth core, guards and token interceptor`
+## 9. Pasos y commits ejecutados (resumen)
 
-### Paso 4 — Auth UI
+1. `chore(app): scaffold Angular 22 with Tailwind, routing and Vitest`
+2. `chore(app): configure Tailwind design tokens and dev proxy`
+3. `feat(app): add auth core, guards and token interceptor`
+4. `feat(app): add auth pages with signal forms`
+5. `feat(app): add discussion features`
+6. `feat(app): add nested comment tree and composer`
+7. `feat(app): add reply depth settings`
+8. `style(app): apply custom forum theme and layout`
+9. `style(app): set header to #0a2240 and fix user dropdown`
+10. `fix(app): make header dropdown items visible`
+11. `feat: normalize usernames and add centered overlay alerts` (actual)
 
-Signal Forms (`form`, `FormField`, `required`, `minLength`, `submit`) para `login`/`register` con manejo 401/409.
+## 10. Prácticas aplicadas
 
-Commit: `feat(app): add auth pages with signal forms`
-
-### Paso 5 — Discusiones
-
-`discussions.ts` + `relative-time.ts` + `discussion-list/create/detail` con `HttpClient` y `signal`.
-
-Commit: `feat(app): add discussion features`
-
-### Paso 6 — Comentarios
-
-`comments.ts` + `comment-tree` recursivo + `comment-composer` (422).
-
-Commit: `feat(app): add nested comment tree and composer`
-
-### Paso 7 — Settings
-
-`settings.ts` con `GET/PATCH /api/users/me/settings` (3/5/null) y `AuthService` update.
-
-Commit: `feat(app): add reply depth settings`
-
-### Paso 8 — Tema
-
-Pulir `styles.css` (`color-scheme`, `::selection`, `focus-visible`) y `app.html` (solo `<router-outlet />`).
-
-Commit: `style(app): apply custom forum theme and layout`
-
-### Paso 9 — Verificación
-
-`pnpm run build` y `npx ng test --watch=false` en verde; actualizar `app/AGENTS.md` y `README.md`.
-
-Commit: `docs(app): document phase 2, setup and tests`
+- Tailwind CSS-first con `@theme`, sin SCSS; `withFetch` no usado; `localStorage` + interceptor + guards funcionales; Signal Forms con `pattern` y sanitización; `hasChanges` en settings; árbol recursivo con `canReplyAt`; `proxy.conf.json`; `pnpm` con `allowBuilds`; `OnPush` por defecto.
