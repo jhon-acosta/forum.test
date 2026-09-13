@@ -1,0 +1,51 @@
+<div class="min-h-screen bg-canvas">
+  <header class="sticky top-0 z-10 bg-surface border-b border-line">
+    <div class="mx-auto max-w-4xl px-4 py-3 flex items-center justify-between">
+      <a routerLink="/discussions" class="text-lg font-semibold tracking-tight">Hilo</a>
+      <div class="flex items-center gap-3">
+        <span class="text-sm text-muted hidden sm:inline">{{ auth.user()?.username }}</span>
+        <a routerLink="/settings" class="text-sm text-muted hover:text-ink">Ajustes</a>
+        <button (click)="logout()" class="text-sm text-muted hover:text-ink">Salir</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-4xl px-4 py-8">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-xl font-semibold">Discusiones</h1>
+      <a routerLink="/discussions/new" class="rounded-md bg-accent hover:bg-accent-strong text-white px-4 py-2 text-sm font-medium">
+        Nueva discusión
+      </a>
+    </div>
+
+    @if (loading()) {
+      <div class="space-y-3">
+        <div class="h-24 bg-surface border border-line rounded-[var(--radius-card)] animate-pulse"></div>
+        <div class="h-24 bg-surface border border-line rounded-[var(--radius-card)] animate-pulse"></div>
+      </div>
+    } @else if (error()) {
+      <div class="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{{ error() }}</div>
+    } @else if (discussions().length === 0) {
+      <div class="bg-surface border border-line rounded-[var(--radius-card)] p-8 text-center">
+        <p class="text-sm text-muted">Aún no hay discusiones. Crea la primera.</p>
+        <a routerLink="/discussions/new" class="inline-block mt-4 text-sm text-accent hover:text-accent-strong font-medium">Crear discusión</a>
+      </div>
+    } @else {
+      <div class="space-y-3">
+        @for (d of discussions(); track d.id) {
+          <a [routerLink]="['/discussions', d.id]" class="block bg-surface border border-line rounded-[var(--radius-card)] p-4 hover:shadow-[var(--shadow-card)] transition-shadow">
+            <h2 class="font-medium line-clamp-1">{{ d.title }}</h2>
+            <p class="text-sm text-muted line-clamp-2 mt-1">{{ d.content }}</p>
+            <div class="flex items-center gap-2 mt-3 text-xs text-muted">
+              <span>{{ d.author.username }}</span>
+              <span>·</span>
+              <span>{{ d.createdAt | relativeTime }}</span>
+              <span>·</span>
+              <span>{{ d.commentCount }} comentarios</span>
+            </div>
+          </a>
+        }
+      </div>
+    }
+  </main>
+</div>

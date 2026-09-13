@@ -1,0 +1,36 @@
+<div class="min-h-screen bg-canvas">
+  <header class="sticky top-0 z-10 bg-surface border-b border-line">
+    <div class="mx-auto max-w-4xl px-4 py-3 flex items-center justify-between">
+      <a routerLink="/discussions" class="text-lg font-semibold tracking-tight">Hilo</a>
+      <a routerLink="/discussions" class="text-sm text-muted hover:text-ink">Volver</a>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-4xl px-4 py-8">
+    @if (loading() && !discussion()) {
+      <div class="h-32 bg-surface border border-line rounded-[var(--radius-card)] animate-pulse"></div>
+    } @else if (error()) {
+      <div class="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{{ error() }}</div>
+    } @else if (discussion(); as d) {
+      <article class="bg-surface border border-line rounded-[var(--radius-card)] p-6">
+        <h1 class="text-xl font-semibold">{{ d.title }}</h1>
+        <p class="text-sm text-muted mt-1">
+          {{ d.author.username }} · {{ d.createdAt | relativeTime }}
+        </p>
+        <p class="mt-4 text-sm leading-relaxed whitespace-pre-wrap">{{ d.content }}</p>
+      </article>
+
+      <section class="mt-8">
+        <h2 class="text-base font-semibold mb-4">Comentarios ({{ d.comments.length }})</h2>
+        <app-comment-composer [discussionId]="d.id" (created)="onCommentCreated()"></app-comment-composer>
+        <div class="mt-6">
+          @if (d.comments.length === 0) {
+            <p class="text-sm text-muted">Sé el primero en comentar.</p>
+          } @else {
+            <app-comment-tree [comments]="d.comments"></app-comment-tree>
+          }
+        </div>
+      </section>
+    }
+  </main>
+</div>
