@@ -16,7 +16,7 @@
           [formField]="loginForm.username"
           (input)="onUsernameInput($event)"
           class="w-full rounded-md border border-line bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-          placeholder="solo minúsculas, sin espacios"
+          placeholder="Ingresar un usuario"
         />
         @if (loginForm.username().touched() && loginForm.username().invalid()) {
           <p class="mt-1 text-xs text-danger">{{ loginForm.username().errors()[0].message }}</p>
