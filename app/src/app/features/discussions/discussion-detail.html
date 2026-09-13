@@ -18,7 +18,7 @@
       <section class="mt-8">
         <h2 class="text-base font-semibold mb-4">Comentarios ({{ d.comments.length }})</h2>
         @if (d.maxReplyDepth === null || d.maxReplyDepth >= 1) {
-          <app-comment-composer [discussionId]="d.id" (created)="onCommentCreated()"></app-comment-composer>
+          <app-comment-composer [discussionId]="d.id" [showVolver]="true" (created)="onCommentCreated()"></app-comment-composer>
         }
         <div class="mt-6">
           @if (d.comments.length === 0) {

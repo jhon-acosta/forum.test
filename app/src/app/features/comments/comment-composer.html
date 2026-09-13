@@ -18,10 +18,14 @@
     }
   </div>
 
-  <div class="flex justify-end gap-2">
-    @if (parentId) {
-      <button type="button" (click)="onCancel()" class="rounded-md border border-line px-3 py-1.5 text-sm">Cancelar</button>
-    }
+  <div class="flex justify-between items-center gap-2">
+    <div>
+      @if (showVolver && !parentId) {
+        <a routerLink="/discussions" class="text-sm text-muted hover:text-ink">← Volver</a>
+      } @else if (parentId) {
+        <button type="button" (click)="onCancel()" class="rounded-md border border-line px-3 py-1.5 text-sm">Cancelar</button>
+      }
+    </div>
     <button
       type="submit"
       [disabled]="composerForm().invalid() || submitting()"

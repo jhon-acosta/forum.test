@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { API_BASE, SettingsResponse } from '../../core/api';
 import { AuthService } from '../../core/auth';
@@ -14,6 +14,8 @@ export class Settings {
   private readonly auth = inject(AuthService);
 
   protected readonly maxReplyDepth = signal<number | null>(3);
+  private readonly initialDepth = signal<number | null>(3);
+  protected readonly hasChanges = computed(() => this.maxReplyDepth() !== this.initialDepth());
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -29,6 +31,7 @@ export class Settings {
     this.http.get<SettingsResponse>(`${API_BASE}/users/me/settings`).subscribe({
       next: (res) => {
         this.maxReplyDepth.set(res.maxReplyDepth);
+        this.initialDepth.set(res.maxReplyDepth);
         this.loading.set(false);
       },
       error: () => {
@@ -51,6 +54,7 @@ export class Settings {
     this.http.patch<SettingsResponse>(`${API_BASE}/users/me/settings`, body).subscribe({
       next: (res) => {
         this.maxReplyDepth.set(res.maxReplyDepth);
+        this.initialDepth.set(res.maxReplyDepth);
         const user = this.auth.user();
         if (user) {
           this.auth.setSession(this.auth.token()!, { ...user, maxReplyDepth: res.maxReplyDepth });

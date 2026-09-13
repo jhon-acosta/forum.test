@@ -1,11 +1,12 @@
 import { Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormField, form, maxLength, required, submit } from '@angular/forms/signals';
 import { CommentsService } from './comments';
 import { ApiErrorResponse } from '../../core/api';
 
 @Component({
   selector: 'app-comment-composer',
-  imports: [FormField],
+  imports: [FormField, RouterLink],
   templateUrl: './comment-composer.html',
 })
 export class CommentComposer {
@@ -13,6 +14,7 @@ export class CommentComposer {
   @Input() parentId: string | null = null;
   @Input() placeholder = 'Escribe un comentario…';
   @Input() autofocus = false;
+  @Input() showVolver = false;
   @Output() created = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
 
