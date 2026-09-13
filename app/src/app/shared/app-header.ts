@@ -1,5 +1,5 @@
 import { UpperCasePipe } from '@angular/common';
-import { Component, HostListener, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth';
 
@@ -13,6 +13,7 @@ export class AppHeader {
   private readonly router = inject(Router);
 
   protected readonly menuOpen = signal(false);
+  private readonly elementRef = inject(ElementRef);
 
   protected toggleMenu() {
     this.menuOpen.update((v) => !v);
@@ -24,8 +25,7 @@ export class AppHeader {
 
   @HostListener('document:click', ['$event'])
   protected onDocumentClick(event: MouseEvent) {
-    const target = event.target as HTMLElement | null;
-    if (!target?.closest('app-header')) {
+    if (!this.elementRef.nativeElement.contains(event.target as Node)) {
       this.closeMenu();
     }
   }
