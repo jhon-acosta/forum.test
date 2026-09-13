@@ -11,7 +11,7 @@
             role="tab"
             [attr.aria-selected]="activeTab() === 'all'"
             [class.bg-accent]="activeTab() === 'all'"
-            [class.text-white]="activeTab() === 'all'"
+            [class.text-ink]="activeTab() === 'all'"
             class="rounded px-3 py-1 text-sm font-medium"
           >
             Todas ({{ all().length }})
@@ -22,7 +22,7 @@
             role="tab"
             [attr.aria-selected]="activeTab() === 'mine'"
             [class.bg-accent]="activeTab() === 'mine'"
-            [class.text-white]="activeTab() === 'mine'"
+            [class.text-ink]="activeTab() === 'mine'"
             class="rounded px-3 py-1 text-sm font-medium"
           >
             Mías ({{ mine().length }})
@@ -33,7 +33,7 @@
             role="tab"
             [attr.aria-selected]="activeTab() === 'participating'"
             [class.bg-accent]="activeTab() === 'participating'"
-            [class.text-white]="activeTab() === 'participating'"
+            [class.text-ink]="activeTab() === 'participating'"
             class="rounded px-3 py-1 text-sm font-medium"
           >
             Participando ({{ participating().length }})
@@ -42,7 +42,7 @@
       </div>
       <a
         routerLink="/discussions/new"
-        class="rounded-md bg-accent hover:bg-accent-strong text-white px-4 py-2 text-sm font-medium self-start sm:self-auto"
+        class="rounded-md bg-accent hover:bg-accent-strong text-ink px-4 py-2 text-sm font-medium self-start sm:self-auto"
       >
         Nueva discusión
       </a>
