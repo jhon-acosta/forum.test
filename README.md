@@ -29,7 +29,7 @@ Prueba técnica Full Stack con IA asistida. Monorepo `api/` (Spring Boot) + `app
 ## Requisitos
 
 - **Java 21** (Temurin). En esta máquina `~/.local/opt/jdk-21`; `~/.bashrc` ya exporta `JAVA_HOME`, `PATH`, `MAVEN_USER_HOME` y `MAVEN_OPTS`. Maven Wrapper (`api/mvnw`) no requiere Maven instalado.
-- **Node 22** y **npm 10** (para Fase 2).
+- **Node 22.22.3** y **pnpm 12.4.1** (para Fase 2, `packageManager: pnpm@12.4.1`).
 - Git, `jq` (opcional, para `marvel-test.sh`), Bruno (opcional).
 
 Si usas otro equipo con `JAVA_HOME` sin configurar:

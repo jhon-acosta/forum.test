@@ -45,7 +45,7 @@ Actúas como **Arquitecto Full Stack Senior** especializado en **Spring Boot + A
 - `~/.m2` pertenece a `root`; se usa `MAVEN_USER_HOME=~/.local/share/maven` + `MAVEN_OPTS=-Dmaven.repo.local=...`.
 - `JAVA_HOME=~/.local/opt/jdk-21` (Temurin 21.0.12.1, Java 21).
 - `~/.local/opt/jdk-21` sin `sudo`.
-- Node `22.22.3`, `pnpm 12.4.1`, `npm 10.9.8`.
+- Node `22.22.3`, gestor **pnpm 12.4.1** (`packageManager: pnpm@12.4.1`); `npm` no se usa.
 
 **API (Fase 1 — completada):**
 - Stack: Spring Boot 4.1.1 (parent), Spring Security 7.1.1, Spring MVC 7, Validation (Jakarta), Lombok, DevTools, Jackson 3 (`tools.jackson.core:jackson-databind:3.1.5`, `DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS` en `jackson.databind.cfg`), `BCryptPasswordEncoder`.
