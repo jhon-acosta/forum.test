@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output, inject, signal } from '@angular
 import { RouterLink } from '@angular/router';
 import { FormField, form, maxLength, required, submit } from '@angular/forms/signals';
 import { CommentsService } from './comments';
+import { NotificationService } from '../../core/notification';
 import { ApiErrorResponse } from '../../core/api';
 
 @Component({
@@ -19,6 +20,7 @@ export class CommentComposer {
   @Output() cancelled = new EventEmitter<void>();
 
   private readonly commentsService = inject(CommentsService);
+  private readonly notification = inject(NotificationService);
 
   protected readonly model = signal({ content: '' });
   protected readonly composerForm = form(this.model, (p) => {
@@ -26,12 +28,10 @@ export class CommentComposer {
     maxLength(p.content, 5000, { message: 'Máximo 5000 caracteres' });
   });
 
-  protected readonly serverError = signal<string | null>(null);
   protected readonly submitting = signal(false);
 
   protected onSubmit(event: Event) {
     event.preventDefault();
-    this.serverError.set(null);
     submit(this.composerForm, async () => {
       this.submitting.set(true);
       try {
@@ -43,16 +43,17 @@ export class CommentComposer {
           });
         });
         this.model.set({ content: '' });
+        this.notification.success('Comentario creado');
         this.created.emit();
       } catch (err) {
         const apiErr = err as { status?: number; error?: ApiErrorResponse };
         const msg = apiErr?.error?.message ?? '';
         if (apiErr?.status === 422 || msg.includes('Maximum reply depth')) {
-          this.serverError.set('Máxima profundidad de respuestas alcanzada para esta discusión');
+          this.notification.error('Máxima profundidad de respuestas alcanzada para esta discusión');
         } else if (apiErr?.status === 404) {
-          this.serverError.set('Discusión o comentario padre no encontrado');
+          this.notification.error('Discusión o comentario padre no encontrado');
         } else {
-          this.serverError.set(msg || 'Error al crear el comentario');
+          this.notification.error(msg || 'Error al crear el comentario');
         }
       } finally {
         this.submitting.set(false);

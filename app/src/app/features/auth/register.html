@@ -3,17 +3,8 @@
     class="w-full max-w-md bg-surface rounded-[var(--radius-card)] shadow-[var(--shadow-card)] border border-line p-8"
   >
     <div class="mb-8 text-center">
-      <h1 class="text-2xl font-semibold tracking-tight">Discusiones</h1>
-      <p class="text-sm text-muted mt-1">Crea tu cuenta</p>
+      <h1 class="text-2xl font-semibold tracking-tight">Discusiones | Registro</h1>
     </div>
-
-    <h2 class="text-lg font-semibold mb-6">Registro</h2>
-
-    @if (serverError()) {
-      <div class="mb-4 rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
-        {{ serverError() }}
-      </div>
-    }
 
     <form (submit)="onSubmit($event)" novalidate class="space-y-4">
       <div>
@@ -23,8 +14,9 @@
           type="text"
           autocomplete="username"
           [formField]="registerForm.username"
+          (input)="onUsernameInput($event)"
           class="w-full rounded-md border border-line bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-          placeholder="el usuario se guarda en users.json"
+          placeholder="solo minúsculas, sin espacios"
         />
         @if (registerForm.username().touched() && registerForm.username().invalid()) {
           <p class="mt-1 text-xs text-danger">{{ registerForm.username().errors()[0].message }}</p>
@@ -39,7 +31,7 @@
           autocomplete="new-password"
           [formField]="registerForm.password"
           class="w-full rounded-md border border-line bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-          placeholder="mínimo 6 caracteres"
+          placeholder="Ingresar una contraseña con un mínimo de 6 caracteres"
         />
         @if (registerForm.password().touched() && registerForm.password().invalid()) {
           <p class="mt-1 text-xs text-danger">{{ registerForm.password().errors()[0].message }}</p>

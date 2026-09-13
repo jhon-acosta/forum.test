@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { FormField, form, maxLength, required, submit } from '@angular/forms/signals';
 import { DiscussionsService } from './discussions';
 import { AppHeader } from '../../shared/app-header';
+import { NotificationService } from '../../core/notification';
 
 @Component({
   selector: 'app-discussion-create',
@@ -12,6 +13,7 @@ import { AppHeader } from '../../shared/app-header';
 export class DiscussionCreate {
   private readonly discussionsService = inject(DiscussionsService);
   private readonly router = inject(Router);
+  private readonly notification = inject(NotificationService);
 
   protected readonly model = signal({ title: '', content: '' });
   protected readonly discussionForm = form(this.model, (p) => {
@@ -21,12 +23,10 @@ export class DiscussionCreate {
     maxLength(p.content, 10000, { message: 'Máximo 10000 caracteres' });
   });
 
-  protected readonly serverError = signal<string | null>(null);
   protected readonly submitting = signal(false);
 
   protected onSubmit(event: Event) {
     event.preventDefault();
-    this.serverError.set(null);
     submit(this.discussionForm, async () => {
       this.submitting.set(true);
       try {
@@ -37,10 +37,11 @@ export class DiscussionCreate {
             error: (err) => reject(err),
           });
         });
+        this.notification.success('Discusión creada');
         this.router.navigate(['/discussions', res.id]);
       } catch (err) {
         const apiErr = err as { error?: import('../../core/api').ApiErrorResponse };
-        this.serverError.set(apiErr?.error?.message ?? 'Error al crear la discusión');
+        this.notification.error(apiErr?.error?.message ?? 'Error al crear la discusión');
       } finally {
         this.submitting.set(false);
       }

@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { API_BASE, SettingsResponse } from '../../core/api';
 import { AuthService } from '../../core/auth';
+import { NotificationService } from '../../core/notification';
 import { AppHeader } from '../../shared/app-header';
 
 @Component({
@@ -12,6 +13,7 @@ import { AppHeader } from '../../shared/app-header';
 export class Settings {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
+  private readonly notification = inject(NotificationService);
 
   protected readonly maxReplyDepth = signal<number | null>(3);
   private readonly initialDepth = signal<number | null>(3);
@@ -19,7 +21,6 @@ export class Settings {
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
-  protected readonly success = signal<string | null>(null);
 
   constructor() {
     this.load();
@@ -43,13 +44,11 @@ export class Settings {
 
   protected selectDepth(value: number | null) {
     this.maxReplyDepth.set(value);
-    this.success.set(null);
   }
 
   protected save() {
     this.saving.set(true);
     this.error.set(null);
-    this.success.set(null);
     const body = { maxReplyDepth: this.maxReplyDepth() };
     this.http.patch<SettingsResponse>(`${API_BASE}/users/me/settings`, body).subscribe({
       next: (res) => {
@@ -59,12 +58,12 @@ export class Settings {
         if (user) {
           this.auth.setSession(this.auth.token()!, { ...user, maxReplyDepth: res.maxReplyDepth });
         }
-        this.success.set('Configuración guardada');
+        this.notification.success('Configuración guardada');
         this.saving.set(false);
       },
       error: (err) => {
         const msg = (err as { error?: { message?: string } })?.error?.message ?? 'Error al guardar';
-        this.error.set(msg);
+        this.notification.error(msg);
         this.saving.set(false);
       },
     });

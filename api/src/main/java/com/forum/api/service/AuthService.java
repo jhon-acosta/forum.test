@@ -1,6 +1,7 @@
 package com.forum.api.service;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,7 +34,11 @@ public class AuthService {
     }
 
     public UserResponse register(RegisterRequest request) {
-        String username = request.username().trim();
+        String username = normalizeUsername(request.username());
+        if (!username.matches("^[a-z0-9._-]{3,30}$")) {
+            throw ApiException.badRequest(
+                    "El nombre de usuario solo permite letras, números, punto, guion y guion bajo, sin espacios");
+        }
         if (userRepository.existsByUsername(username)) {
             throw ApiException.conflict("Username already exists");
         }
@@ -48,7 +53,8 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.username().trim())
+        String username = normalizeUsername(request.username());
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> ApiException.unauthorized("Invalid credentials"));
         if (!passwordEncoder.matches(request.password(), user.passwordHash())) {
             throw ApiException.unauthorized("Invalid credentials");
@@ -61,5 +67,10 @@ public class AuthService {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             tokenService.revoke(authorizationHeader.substring("Bearer ".length()));
         }
+    }
+
+    private String normalizeUsername(String raw) {
+        if (raw == null) return "";
+        return raw.replaceAll("\\s+", "").toLowerCase(Locale.ROOT);
     }
 }

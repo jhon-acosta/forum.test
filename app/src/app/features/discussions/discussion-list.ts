@@ -4,6 +4,7 @@ import { DiscussionsService } from './discussions';
 import { DiscussionSummary } from '../../core/api';
 import { RelativeTimePipe } from '../../shared/relative-time';
 import { AppHeader } from '../../shared/app-header';
+import { NotificationService } from '../../core/notification';
 
 @Component({
   selector: 'app-discussion-list',
@@ -12,6 +13,7 @@ import { AppHeader } from '../../shared/app-header';
 })
 export class DiscussionList {
   private readonly discussionsService = inject(DiscussionsService);
+  private readonly notification = inject(NotificationService);
 
   protected readonly activeTab = signal<'all' | 'mine' | 'participating'>('all');
 
@@ -52,7 +54,7 @@ export class DiscussionList {
         done();
       },
       error: () => {
-        this.error.set('No se pudieron cargar las discusiones');
+        this.notification.error('No se pudieron cargar las discusiones');
         done();
       },
     });
