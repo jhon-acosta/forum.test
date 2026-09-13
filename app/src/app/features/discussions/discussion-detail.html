@@ -27,7 +27,7 @@
           @if (d.comments.length === 0) {
             <p class="text-sm text-muted">Sé el primero en comentar.</p>
           } @else {
-            <app-comment-tree [comments]="d.comments"></app-comment-tree>
+            <app-comment-tree [comments]="d.comments" [discussionId]="d.id" (created)="onCommentCreated()"></app-comment-tree>
           }
         </div>
       </section>
