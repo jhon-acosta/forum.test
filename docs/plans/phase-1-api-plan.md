@@ -14,7 +14,7 @@ Implementar el foro con persistencia en archivos JSON y nivel de anidación conf
 | Framework | Spring Boot 4.1.1 (Maven), `spring-boot-starter-parent` |
 | Auth | Token opaco `UUID` en `Authorization: Bearer`, persistido en `tokens.json` (evolucionable a JWT) |
 | Profundidad ilimitada | `null`; en `PATCH` se distingue `absent→null` (no cambia) vs `null→Optional.empty` (ilimitado) con clase mutable |
-| Repositorio | Monorepo `forum.test/` con `api/`, `app/`, `bruno/`, `seed/`, `docs/` |
+| Repositorio | Monorepo `forum.test/` con `api/`, `app/`, `bruno/`, `docs/` |
 | Commits | Conventional Commits; cada commit y push requiere aprobación |
 | Docs | `docs/prompts/` (02-api, 03-app, 04-master) y `docs/plans/` (fase 1 y 2) |
 

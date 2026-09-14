@@ -90,7 +90,7 @@ Estado final de la Fase 2 (Angular 22 + Tailwind + Signal Forms + Vitest): stack
 ## Restricciones para los planes
 - No modificar código; solo documentar.
 - Conventional Commits; cada commit y push requiere aprobación (excepto docs).
-- Puerto documentado **8081**; `api/data/*.json` gitignoreado, `seed/` trackeado.
+- Puerto documentado **8081**; `api/data/*.json` gitignoreado (datos runtime, usar `marvel-test.sh` o Bruno).
 - No usar `withFetch()` (deprecado); no usar SCSS (Tailwind CSS-first).
 - No añadir comentarios al código.
 

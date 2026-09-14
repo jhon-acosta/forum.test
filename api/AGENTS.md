@@ -26,7 +26,7 @@ En VS Code: `settings.json` con `"java.jdt.ls.java.home": "$HOME/.local/opt/jdk-
 ## Comandos
 
 ```bash
-./mvnw test                          # 42 tests (ver sección Pruebas)
+./mvnw test                          # 44 tests (ver sección Pruebas)
 ./mvnw spring-boot:run               # http://localhost:8081 (data en ./data)
 SERVER_PORT=8081 ./mvnw spring-boot:run  # override temporal
 ./mvnw clean package -DskipTests     # jar en target/forum-api-0.0.1-SNAPSHOT.jar

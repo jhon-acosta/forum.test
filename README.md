@@ -370,9 +370,9 @@ Manejado en `GlobalExceptionHandler` para `ApiException` (409/404/422…), `Meth
 | `UpdateUserSettingsRequestTest` (3) | Jackson 3: `absent→null`, `null→Optional.empty`, valor→`Optional.of` |
 | `AuthServiceTest` (7) | BCrypt, duplicado→409, login válido/inválido, logout |
 | `UserServiceTest` (6) | `getById`, 3 semánticas de settings, negativo→400 |
-| `DiscussionServiceTest` (5) | Crear, orden desc + `commentCount`, `findById` con `CommentService.findTree`, propias |
+| `DiscussionServiceTest` (6) | Crear, orden desc + `commentCount`, `findById` con `CommentService.findTree`, propias, `findParticipating` sin propias |
 | `CommentServiceTest` (8) | Niveles 1/2/3 con `maxDepth=3`, 4→422, `null` ilimitado, padre otra discusión/inexistente, discusión inexistente, árbol |
-| `ForumApiIntegrationTest` (3) | `@SpringBootTest` + `MockMvc` en `:8081`: flujo E2E (register→login→discussion→comment→reply hasta 3→422→PATCH ilimitado→nivel 4/5→árbol), duplicado→409, login erróneo→401. `cleanData()` borra `target/test-data` por `BeforeEach` |
+| `ForumApiIntegrationTest` (4) | `@SpringBootTest` + `MockMvc` en `:8081`: flujo E2E (register→login→discussion→comment→reply hasta 3→422→PATCH ilimitado→nivel 4/5→árbol + `participatingExcludesOwnDiscussions`), duplicado→409, login erróneo→401. `cleanData()` borra `target/test-data` por `BeforeEach` |
 
 ---
 
